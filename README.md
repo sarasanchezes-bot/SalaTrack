@@ -1,13 +1,10 @@
 # SalaTrack — Sistema de Gestión y Análisis de Salas de Cómputo
 
 Proyecto del curso Bases de Datos Avanzadas — Universidad Católica Luis Amigó
-
 Docente: Juan Felipe Muñoz Fernández
 
 Participantes y roles
-
 Usuario GitHub	Rol
-
 @sarasanchezes-bot	Líder de desarrollo - Diseño de BD - Analítica
 
 # 📋 Descripción del problema
