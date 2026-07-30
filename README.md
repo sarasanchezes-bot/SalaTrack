@@ -34,7 +34,9 @@ Se planea construir un módulo de análisis histórico que permita identificar p
 
 # 👥 Posibles usuarios del sistema
 Estudiantes: utilizarán las salas en el marco de sus clases asignadas. No realizarán reservas directas — para trabajo autónomo cuentan con las salas de la biblioteca. Su rol en el sistema será reportar incidencias técnicas durante las sesiones (equipo que no enciende, software que no funciona, restricciones que impiden el desarrollo de la clase).
+
 Docentes: podrán realizar reservas puntuales de salas para sesiones adicionales fuera de su asignación semestral, y reportar incidencias relacionadas con permisos o configuraciones de software.
+
 Técnicos de soporte: registrarán y gestionarán mantenimientos, atenderán las incidencias reportadas y administrarán las configuraciones de software por sala.
 Coordinación académica / administrativa: gestionará las asignaciones semestrales, consultará reportes analíticos y tomará decisiones de inversión o reposición de equipos.
 
