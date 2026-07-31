@@ -14,7 +14,7 @@ Las salas de cómputo de la Universidad Católica Luis Amigó son un recurso cr�
 
 Un caso concreto: el software se instala según lo solicita cada docente, pero con restricciones de permisos que impiden modificar configuraciones, habilitar protocolos o instalar herramientas durante la clase — como ocurre al no poder habilitar conexiones TCP en un motor de base de datos. No hay un canal formal para reportar estas situaciones, ni registro de cuántas clases se ven afectadas y por qué.
 
-La consecuencia de fondo: la institución no tiene datos para decidir qué salas presentan más problemas, qué equipos fallan repetidamente, qué materias resultan más afectadas, ni si conviene invertir en equipos o ajustar configuraciones. Hoy esas decisiones se toman sin evidencia.
+La consecuencia de fondo: la institución no tiene datos para decidir qué salas presentan más problemas, qué equipos fallan repetidamente, qué materias resultan más afectadas, ni si conviene invertir en equipos o ajustar configuraciones. A esto se suma que los equipos se reconfiguran al inicio de cada semestre —se limpian e instalan los programas según lo que se requiera— sin una fuente estructurada que indique qué necesita cada materia, por lo que los mismos errores de configuración tienden a repetirse período tras período. Hoy esas decisiones y esa preparación se hacen sin evidencia ni memoria histórica.
 
 SalaTrack será un sistema backend que registrará qué ofrece cada sala, qué requiere cada curso y qué ocurre durante las sesiones, para convertir ese cruce en información útil para la toma de decisiones.
 
@@ -69,12 +69,13 @@ Incidencia — reporte de falla durante una sesión (estructura a definir en la 
 
 # 📏 Reglas de negocio
 1. Al asignar una sala a un curso, el sistema deberá verificar la compatibilidad entre los requisitos técnicos del curso y la dotación real de la sala (software instalado y niveles de permisos). Si la sala no cumple los requisitos obligatorios del curso, la asignación quedará marcada como "asignada con requisitos pendientes" y generará automáticamente las solicitudes de instalación o permisos correspondientes al área técnica.
-2. El perfil de permisos de una sala estará asociado a su asignación semestral vigente y solo podrá ser modificado por un administrador, no por docentes ni estudiantes.
+2. Al iniciar un nuevo semestre, el sistema deberá generar automáticamente la lista de software y configuraciones a instalar en cada sala, a partir de los cursos asignados y sus requisitos técnicos. Esto entrega al área de sistemas una guía estructurada para la preparación de los equipos, en lugar de depender de solicitudes dispersas o de la memoria de semestres anteriores. 
+3. El perfil de permisos de una sala estará asociado a su asignación semestral vigente y solo podrá ser modificado por un administrador, no por docentes ni estudiantes.
 Un equipo en estado "en mantenimiento" o "fuera de servicio" no podrá ser contado como parte de la capacidad operativa de una sala al momento de validar una asignación.
-3. Toda incidencia reportada durante una sesión de clase deberá ser atendida antes de la siguiente sesión del mismo curso en esa sala. El sistema llevará registro formal de cada incidencia — sala, equipo, clase afectada y estado de atención — para garantizar trazabilidad y evitar que problemas recurrentes queden sin respuesta institucional.
-4. La acumulación de incidencias repetidas en un mismo equipo dentro de un período corto deberá generar automáticamente una alerta de mantenimiento, evitando que equipos problemáticos sigan en uso sin intervención técnica.
-5. Toda solicitud de permiso o configuración adicional realizada por un docente deberá ser respondida — aprobada o rechazada con justificación — antes de la siguiente sesión del curso solicitante.
-6. El sistema llevará registro del estado y tiempo de respuesta de cada solicitud, para que las restricciones que afectan el desarrollo de las clases tengan un canal formal de gestión.
+4. Toda incidencia reportada durante una sesión de clase deberá ser atendida antes de la siguiente sesión del mismo curso en esa sala. El sistema llevará registro formal de cada incidencia — sala, equipo, clase afectada y estado de atención — para garantizar trazabilidad y evitar que problemas recurrentes queden sin respuesta institucional.
+5. La acumulación de incidencias repetidas en un mismo equipo dentro de un período corto deberá generar automáticamente una alerta de mantenimiento, evitando que equipos problemáticos sigan en uso sin intervención técnica.
+6. Toda solicitud de permiso o configuración adicional realizada por un docente deberá ser respondida — aprobada o rechazada con justificación — antes de la siguiente sesión del curso solicitante.
+7. El sistema llevará registro del estado y tiempo de respuesta de cada solicitud, para que las restricciones que afectan el desarrollo de las clases tengan un canal formal de gestión.
    
 # 🤔 ¿Por qué este proyecto es suficientemente complejo?
 
