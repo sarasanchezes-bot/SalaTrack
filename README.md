@@ -1,6 +1,7 @@
 # SalaTrack — Sistema de Gestión y Análisis de Salas de Cómputo
 
 Proyecto del curso Bases de Datos Avanzadas — Universidad Católica Luis Amigó
+
 Docente: Juan Felipe Muñoz Fernández
 
 Participantes y roles
@@ -113,5 +114,7 @@ Los siguientes son ejemplos representativos del tipo de consultas realizadas a l
 Compromisos:
 
 Todo lo generado con IA será revisado y comprendido por la autora antes de ser commiteado.
+
 En la defensa oral se podrán explicar y justificar todas las decisiones de diseño.
+
 Los prompts utilizados se documentarán progresivamente en un documento aprte según lo requiera el profesor.
