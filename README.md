@@ -17,14 +17,14 @@ La consecuencia de fondo: la institución no tiene datos para decidir qué salas
 
 SalaTrack será un sistema backend que registrará qué ofrece cada sala, qué requiere cada curso y qué ocurre durante las sesiones, para convertir ese cruce en información útil para la toma de decisiones.
 
-Alcance: el sistema cubrirá las salas de clases y laboratorios: asignaciones semestrales, reservas puntuales de docentes, requisitos técnicos de cada curso frente a la dotación real de las salas, registro de incidencias, mantenimientos y análisis histórico. Queda fuera la gestión de las salas de la biblioteca (uso libre de estudiantes) y la administración de red e infraestructura física, que corresponde al área de sistemas.
+Alcance: el sistema cubrirá las salas de clases y laboratorios: asignaciones semestrales, requisitos técnicos de cada curso frente a la dotación real de las salas, registro de incidencias, mantenimientos y análisis histórico. Queda fuera la reserva puntual de salas (que ya gestiona el sistema académico de la universidad), la gestión de las salas de la biblioteca (uso libre de estudiantes) y la administración de red e infraestructura física, que corresponde al área de sistemas.
 
 # 🎯 Solución propuesta por unidades
 
 El sistema abordará el problema en tres grandes módulos, cada uno con la tecnología más adecuada según lo visto en el curso:
 
 Gestión operativa (Unidad 1 — SQL Server):
-Se planea modelar y gestionar salas, equipos, software instalado, requisitos técnicos por curso, asignaciones semestrales, reservas puntuales de docentes y mantenimientos. Esta parte del sistema requerirá integridad transaccional y validaciones de compatibilidad entre lo que cada curso necesita y lo que cada sala ofrece, por lo que se trabajará sobre una base de datos relacional. Se explorarán herramientas avanzadas de SQL Server como stored procedures, triggers y CTEs a medida que se avance en el curso.
+Se planea modelar y gestionar salas, equipos, software instalado, requisitos técnicos por curso, asignaciones semestrales y mantenimientos. Esta parte del sistema requerirá integridad transaccional y validaciones de compatibilidad entre lo que cada curso necesita y lo que cada sala ofrece, por lo que se trabajará sobre una base de datos relacional. Se explorarán herramientas avanzadas de SQL Server como stored procedures, triggers y CTEs a medida que se avance en el curso.
 
 Registro de eventos e incidencias (Unidad 2 — bases de datos no relacionales):
 Las incidencias reportadas durante las sesiones de clase son datos de naturaleza variable: una falla de hardware no tiene los mismos campos que un problema de permisos o un error de software. Por esta razón se planea explorar el uso de una base de datos no relacional para este módulo, que permita registrar cada incidencia con la estructura que mejor se adapte a su tipo, sin forzar un esquema fijo.
@@ -35,13 +35,13 @@ Se planea construir un módulo de análisis histórico que permita identificar p
 # 👥 Posibles usuarios del sistema
 Estudiantes: utilizarán las salas en el marco de sus clases asignadas. No realizarán reservas directas — para trabajo autónomo cuentan con las salas de la biblioteca. Su rol en el sistema será reportar incidencias técnicas durante las sesiones (equipo que no enciende, software que no funciona, restricciones que impiden el desarrollo de la clase).
 
-Docentes: podrán realizar reservas puntuales de salas para sesiones adicionales fuera de su asignación semestral, y reportar incidencias relacionadas con permisos o configuraciones de software.
+Docentes: registrarán los requisitos técnicos de sus cursos, solicitarán permisos o software adicional cuando sea necesario, y reportarán incidencias relacionadas con configuraciones que afecten sus clases.
 
 Técnicos de soporte: registrarán y gestionarán mantenimientos, atenderán las incidencias reportadas y administrarán las configuraciones de software por sala.
+
 Coordinación académica / administrativa: gestionará las asignaciones semestrales, consultará reportes analíticos y tomará decisiones de inversión o reposición de equipos.
 
 # 🗂️ Lista preliminar de entidades
-
 Esta lista representa una aproximación inicial al modelo de datos. Se espera que evolucione a medida que se avance en los contenidos del curso.
 
 Sala — identificador, nombre, ubicación, capacidad, estado
@@ -52,34 +52,33 @@ Usuario — identificador, tipo (estudiante / docente / técnico / admin), progr
 Curso — id, nombre, código, programa académico, docente responsable, semestre
 RequisitoCurso — curso, software o configuración requerida, nivel de permisos necesario, obligatorio u opcional
 AsignacionSemestral — sala, curso, horario fijo (día, hora inicio, hora fin), semestre, perfil de permisos aplicado a la sala
-Reserva — docente, sala, fecha y horario, estado
 Mantenimiento — equipo, técnico responsable, fecha, tipo, descripción, estado
 SolicitudPermiso — docente, sala, configuración o software requerido, justificación, estado
 Incidencia — reporte de falla durante una sesión (estructura a definir en la unidad 2)
-📏 Reglas de negocio
-Al asignar una sala a un curso, el sistema deberá verificar la compatibilidad entre los requisitos técnicos del curso y la dotación real de la sala (software instalado y niveles de permisos). Si la sala no cumple los requisitos obligatorios del curso, la asignación quedará marcada como "asignada con requisitos pendientes" y generará automáticamente las solicitudes de instalación o permisos correspondientes al área técnica.
-Una sala con asignación semestral activa no podrá recibir reservas puntuales en ese bloque horario. Ningún docente podrá reservar una sala en un horario que ya esté asignado a un curso durante el semestre.
-El perfil de permisos de una sala estará asociado a su asignación semestral vigente y solo podrá ser modificado por un administrador, no por docentes ni estudiantes.
-Un equipo en estado "en mantenimiento" o "fuera de servicio" no podrá ser incluido en asignaciones ni reservas activas.
-Toda incidencia reportada durante una sesión de clase deberá ser atendida antes de la siguiente sesión del mismo curso en esa sala. El sistema llevará registro formal de cada incidencia — sala, equipo, clase afectada y estado de atención — para garantizar trazabilidad y evitar que problemas recurrentes queden sin respuesta institucional.
-La acumulación de incidencias repetidas en un mismo equipo dentro de un período corto deberá generar automáticamente una alerta de mantenimiento, evitando que equipos problemáticos sigan en uso sin intervención técnica.
-Las reservas puntuales de docentes que no sean confirmadas con suficiente antelación se cancelarán automáticamente, liberando el recurso para otros usos.
-Toda solicitud de permiso o configuración adicional realizada por un docente deberá ser respondida — aprobada o rechazada con justificación — antes de la siguiente sesión del curso solicitante. El sistema llevará registro del estado y tiempo de respuesta de cada solicitud, para que las restricciones que afectan el desarrollo de las clases tengan un canal formal de gestión.
+
+# 📏 Reglas de negocio
+1. Al asignar una sala a un curso, el sistema deberá verificar la compatibilidad entre los requisitos técnicos del curso y la dotación real de la sala (software instalado y niveles de permisos). Si la sala no cumple los requisitos obligatorios del curso, la asignación quedará marcada como "asignada con requisitos pendientes" y generará automáticamente las solicitudes de instalación o permisos correspondientes al área técnica.
+2. El perfil de permisos de una sala estará asociado a su asignación semestral vigente y solo podrá ser modificado por un administrador, no por docentes ni estudiantes.
+Un equipo en estado "en mantenimiento" o "fuera de servicio" no podrá ser contado como parte de la capacidad operativa de una sala al momento de validar una asignación.
+3. Toda incidencia reportada durante una sesión de clase deberá ser atendida antes de la siguiente sesión del mismo curso en esa sala. El sistema llevará registro formal de cada incidencia — sala, equipo, clase afectada y estado de atención — para garantizar trazabilidad y evitar que problemas recurrentes queden sin respuesta institucional.
+4. La acumulación de incidencias repetidas en un mismo equipo dentro de un período corto deberá generar automáticamente una alerta de mantenimiento, evitando que equipos problemáticos sigan en uso sin intervención técnica.
+5. Toda solicitud de permiso o configuración adicional realizada por un docente deberá ser respondida — aprobada o rechazada con justificación — antes de la siguiente sesión del curso solicitante.
+6. El sistema llevará registro del estado y tiempo de respuesta de cada solicitud, para que las restricciones que afectan el desarrollo de las clases tengan un canal formal de gestión.
+   
 # 🤔 ¿Por qué este proyecto es suficientemente complejo?
 
 1. El problema es real y multidimensional:
 No se trata de un ejercicio académico genérico. El sistema busca resolver una situación concreta que ocurre en la propia institución, con usuarios reales, restricciones reales y decisiones reales de por medio. Eso implica modelar matices que no aparecen en ejemplos de libro.
 
 2. Lógica de compatibilidad entre necesidades y recursos:
-El sistema deberá cruzar los requisitos técnicos de cada curso contra la dotación real de cada sala (software instalado y niveles de permisos), detectar brechas y generar acciones a partir de ellas. Además deberá gestionar la coexistencia de asignaciones semestrales fijas y reservas puntuales sin conflictos de horario. Esta lógica va más allá del CRUD básico.
+El sistema deberá cruzar los requisitos técnicos de cada curso contra la dotación real de cada sala (software instalado y niveles de permisos), detectar brechas y generar acciones a partir de ellas — solicitudes automáticas al área técnica, alertas de incompatibilidad, seguimiento de resolución. Esta lógica va más allá del CRUD básico.
 
 3. Datos de distinta naturaleza que justifican distintas tecnologías:
-Las operaciones transaccionales (reservas, mantenimientos) y los eventos variables (incidencias) tienen características distintas que justifican aproximaciones diferentes al almacenamiento, lo cual conecta directamente con los objetivos del curso.
+Las operaciones transaccionales (asignaciones, mantenimientos, solicitudes) y los eventos variables (incidencias) tienen características distintas que justifican aproximaciones diferentes al almacenamiento, lo cual conecta directamente con los objetivos del curso.
 
 4. Orientación a decisiones reales:
 El módulo analítico no será decorativo — buscará responder preguntas concretas: qué equipos deben reemplazarse, qué horarios tienen mayor demanda, qué cursos generan más incidencias. Información que una coordinación académica real necesitaría para tomar decisiones de inversión.
 # Política de uso de IA
-
 Herramientas utilizadas: Claude (Anthropic).
 
 Cómo se ha usado hasta ahora:
@@ -97,7 +96,7 @@ Los siguientes son ejemplos representativos del tipo de consultas realizadas a l
 
 "En esa clase el profe se quejaba de un problema real en la universidad: las salas de cómputo tienen software instalado pero con permisos restringidos que no dejan configurar cosas en clase. Quiero construir mi proyecto de bases de datos sobre esto. ¿Este problema da para usar bases de datos relacionales, no relacionales y análisis de datos, o se queda corto? Aparte quiero que me sugieras más ideas por si el mío no sirve para el uso de las bases de datos que ya te mencioné."
 
-"En mi universidad las salas se asignan a un curso durante todo el semestre, pero los docentes también pueden pedir salas sueltas para clases extra. ¿Tiene sentido modelar la asignación semestral como una entidad distinta de la reserva puntual, o las uno en una sola tabla?"
+"El sistema académico de mi universidad ya permite reservar salas, así que no quiero duplicar eso. Mi enfoque sería el cruce entre lo que cada materia necesita y lo que cada sala realmente tiene. ¿Cómo modelo los requisitos técnicos de un curso como entidad?"
 
 "Los estudiantes en mi universidad no reservan salas porque usan las de la biblioteca. ¿Cómo debería ajustar el rol del estudiante en mi sistema para que sea coherente con eso?"
 
