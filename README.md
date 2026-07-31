@@ -45,15 +45,25 @@ Coordinación académica / administrativa: gestionará las asignaciones semestra
 Esta lista representa una aproximación inicial al modelo de datos. Se espera que evolucione a medida que se avance en los contenidos del curso.
 
 Sala — identificador, nombre, ubicación, capacidad, estado.
+
 Equipo — identificador, sala a la que pertenece, especificaciones básicas, estado.
+
 Software — nombre, versión, tipo de licencia.
+
 EquipoSoftware — relación entre equipos y software instalado, con nivel de permisos asignado.
+
 Usuario — identificador, tipo (estudiante / docente / técnico / admin), programa académico.
+
 Curso — id, nombre, código, programa académico, docente responsable, semestre.
+
 RequisitoCurso — curso, software o configuración requerida, nivel de permisos necesario, obligatorio u opcional.
+
 AsignacionSemestral — sala, curso, horario fijo (día, hora inicio, hora fin), semestre, perfil de permisos aplicado a la sala.
+
 Mantenimiento — equipo, técnico responsable, fecha, tipo, descripción, estado.
+
 SolicitudPermiso — docente, sala, configuración o software requerido, justificación, estado.
+
 Incidencia — reporte de falla durante una sesión (estructura a definir en la unidad 2).
 
 # 📏 Reglas de negocio
