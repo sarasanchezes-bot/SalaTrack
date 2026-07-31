@@ -44,17 +44,17 @@ Coordinación académica / administrativa: gestionará las asignaciones semestra
 # 🗂️ Lista preliminar de entidades
 Esta lista representa una aproximación inicial al modelo de datos. Se espera que evolucione a medida que se avance en los contenidos del curso.
 
-Sala — identificador, nombre, ubicación, capacidad, estado
-Equipo — identificador, sala a la que pertenece, especificaciones básicas, estado
-Software — nombre, versión, tipo de licencia
-EquipoSoftware — relación entre equipos y software instalado, con nivel de permisos asignado
-Usuario — identificador, tipo (estudiante / docente / técnico / admin), programa académico
-Curso — id, nombre, código, programa académico, docente responsable, semestre
-RequisitoCurso — curso, software o configuración requerida, nivel de permisos necesario, obligatorio u opcional
-AsignacionSemestral — sala, curso, horario fijo (día, hora inicio, hora fin), semestre, perfil de permisos aplicado a la sala
-Mantenimiento — equipo, técnico responsable, fecha, tipo, descripción, estado
-SolicitudPermiso — docente, sala, configuración o software requerido, justificación, estado
-Incidencia — reporte de falla durante una sesión (estructura a definir en la unidad 2)
+Sala — identificador, nombre, ubicación, capacidad, estado.
+Equipo — identificador, sala a la que pertenece, especificaciones básicas, estado.
+Software — nombre, versión, tipo de licencia.
+EquipoSoftware — relación entre equipos y software instalado, con nivel de permisos asignado.
+Usuario — identificador, tipo (estudiante / docente / técnico / admin), programa académico.
+Curso — id, nombre, código, programa académico, docente responsable, semestre.
+RequisitoCurso — curso, software o configuración requerida, nivel de permisos necesario, obligatorio u opcional.
+AsignacionSemestral — sala, curso, horario fijo (día, hora inicio, hora fin), semestre, perfil de permisos aplicado a la sala.
+Mantenimiento — equipo, técnico responsable, fecha, tipo, descripción, estado.
+SolicitudPermiso — docente, sala, configuración o software requerido, justificación, estado.
+Incidencia — reporte de falla durante una sesión (estructura a definir en la unidad 2).
 
 # 📏 Reglas de negocio
 1. Al asignar una sala a un curso, el sistema deberá verificar la compatibilidad entre los requisitos técnicos del curso y la dotación real de la sala (software instalado y niveles de permisos). Si la sala no cumple los requisitos obligatorios del curso, la asignación quedará marcada como "asignada con requisitos pendientes" y generará automáticamente las solicitudes de instalación o permisos correspondientes al área técnica.
