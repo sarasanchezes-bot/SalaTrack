@@ -4,7 +4,9 @@ Proyecto del curso Bases de Datos Avanzadas — Universidad Católica Luis Amig�
 
 Participantes y roles
 Usuario GitHub	Rol
-@sarasanchezes-bot	Líder de desarrollo - Diseño de BD - Analítica
+@sarasanchezes-bot Líder de desarrollo 
+@pedromcleanwa-dev Diseño de BD 
+@John3202026  Analítica
 
 # 📋 Descripción del problema
 
