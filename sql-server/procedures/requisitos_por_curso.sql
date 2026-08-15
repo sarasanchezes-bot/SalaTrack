@@ -2,7 +2,7 @@ USE SalaTrack;
 GO
 
 -- Lista, por cada curso, sus requisitos separando obligatorios y opcionales (Obviamente basado en el requisito funcional 5).
-CREATE VIEW vw_requisitos_por_curso AS
+CREATE OR ALTER VIEW vw_requisitos_por_curso AS
 SELECT
     c.curso_id,
     c.nombre AS curso,
