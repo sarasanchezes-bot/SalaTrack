@@ -24,12 +24,12 @@ INSERT INTO RequisitoCurso (curso_id, software_id, descripcion_configuracion, ni
 GO
 
 -- Asignaciones semestrales, cruzadas con las 3 salas reales (301=1, 302=2, Lab 401=3).
--- Sala 1 tiene SQL Server, Visual Studio y Docker instalados.
+-- Sala 1 tiene SQL Server, Visual Studio y Docker.
 -- Sala 2 solo tiene Visual Studio y Python.
 -- Sala 3 tiene Python, MongoDB y Docker.
 -- Curso 4 (ARQUITECTURA DE SISTEMAS) se deja a proposito en Sala 2, que NO tiene
--- Docker ni MongoDB instalados: la vista vbw_verificacion_compatibilidad de la
--- lider del proyecto (Sara) debe marcar ambos como falta.
+-- Docker ni MongoDB instalados: la vista vw_verificacion_compatibilidad de la
+-- lider del proyecto (Sara) debe marcar ambos como FALTA.
 INSERT INTO AsignacionSemestral (sala_id, curso_id, semestre, dia_semana, hora_inicio, hora_fin, perfil_permisos, estado) VALUES
 (1, 1, '2026-2', 'Lunes', '08:00', '10:00', 'administrador', 'asignada'),
 (2, 2, '2026-2', 'Martes', '10:00', '12:00', 'estandar', 'asignada'),
