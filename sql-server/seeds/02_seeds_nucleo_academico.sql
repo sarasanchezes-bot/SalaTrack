@@ -28,8 +28,8 @@ GO
 -- Sala 2 solo tiene Visual Studio y Python.
 -- Sala 3 tiene Python, MongoDB y Docker.
 -- Curso 4 (ARQUITECTURA DE SISTEMAS) se deja a proposito en Sala 2, que NO tiene
--- Docker ni MongoDB instalados: la vista vw_verificacion_compatibilidad de la
--- lider debe marcar ambos como FALTA.
+-- Docker ni MongoDB instalados: la vista vbw_verificacion_compatibilidad de la
+-- lider del proyecto (Sara) debe marcar ambos como falta.
 INSERT INTO AsignacionSemestral (sala_id, curso_id, semestre, dia_semana, hora_inicio, hora_fin, perfil_permisos, estado) VALUES
 (1, 1, '2026-2', 'Lunes', '08:00', '10:00', 'administrador', 'asignada'),
 (2, 2, '2026-2', 'Martes', '10:00', '12:00', 'estandar', 'asignada'),
