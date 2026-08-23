@@ -1,3 +1,6 @@
+USE SalaTrack;
+GO
+
 IF EXISTS (SELECT * FROM sys.triggers WHERE name = 'trg_mantenimiento_actualiza_equipo')
     DROP TRIGGER trg_mantenimiento_actualiza_equipo;
 GO
