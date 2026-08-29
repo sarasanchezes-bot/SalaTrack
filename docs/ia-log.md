@@ -1,13 +1,3 @@
-# Registro de uso de IA
-
-Este documento deja constancia del uso de asistentes de IA durante el desarrollo de SalaTrack, según la política declarada en el README.
-
-## Formato
-
-Por cada uso relevante se registra: fecha, para qué se usó, qué prompt se hizo y qué decisión se tomó a partir de la respuesta.
-
----
-
 ## Registro
 
 ### Definición del proyecto
@@ -18,5 +8,9 @@ Por cada uso relevante se registra: fecha, para qué se usó, qué prompt se hiz
 - **Para qué:** confirmar posibles fallos a la hora de subir las tablas creadas y su relación con otras al momento de subir el archivo.
 - **Prompt usado:** "Dado el contexto brindado, ¿te parece bien que algunas de las relaciones estén establecidas de dicha manera? Asi mismo, ¿podrías brindarme un comando específico para la creación de una branch adicional?"
 - **Decisión tomada:** Se revisó la estructura propuesta, dando el visto bueno para su implementación. La idea del proyecto se aprobó para el contexto específico, al considerarse de gran interés y relevancia para la universidad. Se brindaron correctamente los comandos para implementar una rama (branch) adicional.
+
+### CTEs de reportes, función de tabla, procedimiento almacenado y diagrama ER (Unidad 1)
+- **Prompt usado:** revisar el estado del repositorio, identificar qué exigencias de la carta descriptiva faltaban en el módulo relacional, y proponer CTE, función y procedimiento ligados a los requisitos del proyecto (RF-06, RF-07, RF-10, RF-11), además del diagrama ER del modelo.
+- **Decisión tomada:** se probaron las CTE contra la base de datos local y se validaron los resultados antes de aceptarlas; se aprobó el diagrama ER verificando que reflejara correctamente el esquema existente.
 
 <!-- Agregar nuevos registros a medida que se avanza -->
