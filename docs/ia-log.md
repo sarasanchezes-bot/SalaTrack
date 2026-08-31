@@ -13,4 +13,10 @@
 - **Prompt usado:** revisar el estado del repositorio, identificar qué exigencias de la carta descriptiva faltaban en el módulo relacional, y proponer CTE, función y procedimiento ligados a los requisitos del proyecto (RF-06, RF-07, RF-10, RF-11), además del diagrama ER del modelo.
 - **Decisión tomada:** se probaron las CTE contra la base de datos local y se validaron los resultados antes de aceptarlas; se aprobó el diagrama ER verificando que reflejara correctamente el esquema existente.
 
+### Procedimiento sp_registrar_solicitud_permiso (RF-10)
+- **Para qué:** Validar la estructura del procedimiento almacenado que registra una nueva solicitud de permiso, con manejo transaccional.
+- **Prompt usado:** Revisar la estructura básica del procedimiento almacenado "sp_registrar_solicitud_permiso" con el objetivo de mejorar su eficiencia o encontrar problemáticas.
+- **Decisión tomada:** se aceptó la estructura propuesta (validación del curso antes de insertar, BEGIN TRY/CATCH con ROLLBACK en caso de error), se recomendó un pequeño cambio adicional.
+
+
 <!-- Agregar nuevos registros a medida que se avanza -->
