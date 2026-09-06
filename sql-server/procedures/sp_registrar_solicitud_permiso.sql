@@ -8,6 +8,7 @@ CREATE OR ALTER PROCEDURE sp_registrar_solicitud_permiso
 AS
 BEGIN
     SET NOCOUNT ON;
+    SET XACT_ABORT ON;
 
     BEGIN TRY
         BEGIN TRANSACTION;
@@ -19,6 +20,12 @@ BEGIN
 
         INSERT INTO SolicitudPermiso (curso_id, software_solicitado, justificacion, fecha_solicitud, estado)
         VALUES (@curso_id, @software_solicitado, @justificacion, GETDATE(), 'pendiente');
+
+        DECLARE @nueva_solicitud_id INT;
+        SET @nueva_solicitud_id = SCOPE_IDENTITY();
+
+        INSERT INTO HistorialSolicitud (solicitud_id, estado_anterior, estado_nuevo)
+        VALUES (@nueva_solicitud_id, 'pendiente', 'pendiente');
 
         COMMIT TRANSACTION;
     END TRY
