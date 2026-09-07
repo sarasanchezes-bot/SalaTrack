@@ -90,6 +90,83 @@ Las operaciones transaccionales (asignaciones, mantenimientos, solicitudes) y lo
 
 4. Orientación a decisiones reales:
 El módulo analítico no será decorativo — buscará responder preguntas concretas: qué equipos deben reemplazarse, qué horarios tienen mayor demanda, qué cursos generan más incidencias. Información que una coordinación académica real necesitaría para tomar decisiones de inversión.
+
+# Objetos de base de datos (Unidad 1 - SQL Server)
+
+Esta sección describe los objetos ya implementados sobre el módulo relacional, y cómo ejecutarlos. 
+
+## Vistas
+
+Ubicadas en `sql-server/views/`:
+
+ **`vw_verificacion_compatibilidad`** (`verificar_compatibilidad.sql`) - Dada una sala y un curso, indica si la sala cumple los requisitos obligatorios del curso, cruzando `RequisitoCurso` contra `EquipoSoftware`. Apoya el requisito funcional número 6.
+  ```sql
+  SELECT * FROM vw_verificacion_compatibilidad;
+  ```
+**`vw_lista_instalacion`** (`lista_instalacion.sql`) - Agrupa por sala el software obligatorio que le falta instalar. Apoya el requisito funcional número 7.
+  ```sql
+  SELECT * FROM vw_lista_instalacion;
+  ```
+**`vw_requisitos_por_curso`** (`requisitos_por_curso.sql`) - Lista, por curso, sus requisitos técnicos separando obligatorios de opcionales. Apoya el requisito funcional número 5.
+  ```sql
+  SELECT * FROM vw_requisitos_por_curso ORDER BY curso_id, categoria;
+  ```
+
+## Funciones
+
+Ubicadas en `sql-server/functions/`:
+
+ **`fn_requisitos_pendientes_sala(@sala_id)`** - Función de tabla que, para una sala dada, devuelve el software obligatorio que le falta a partir de sus asignaciones vigentes.
+  ```sql
+  SELECT * FROM fn_requisitos_pendientes_sala(1);
+  ```
+
+## Triggers
+
+Ubicados en `sql-server/triggers/`:
+
+ **`trg_mantenimiento_actualiza_equipo`** - `AFTER INSERT` en `Mantenimiento`; pone `Equipo.estado = 'en mantenimiento'` automáticamente al registrar un mantenimiento nuevo.
+ **`trg_historial_solicitud`** - `AFTER UPDATE` en `SolicitudPermiso`; registra en `HistorialSolicitud` cada cambio de estado de una solicitud. Apoya el RNF-03 y el RF-10.
+
+## CTEs
+
+Ubicadas en `sql-server/queries/08_ctes_reportes.sql`:
+
+ **CTE 1** - Ranking de salas por cantidad de requisitos obligatorios faltantes, usando `RANK()`.
+**CTE 2 (recursiva)** - Genera el calendario completo de sesiones de clase de cada asignación semestral. Apoya el requisito funcional número 11.
+
+## Procedimientos almacenados
+
+Ubicados en `sql-server/procedures/`:
+
+**`sp_asignar_curso_sala`** - Asigna un curso a una sala validando disponibilidad, y genera automáticamente los registros en `RequisitoPendiente` si la sala no cumple algún requisito obligatorio. Transacción con `SET XACT_ABORT ON` y `THROW`. Apoya el RF-06.
+  ```sql
+  DECLARE @id INT;
+  EXEC sp_asignar_curso_sala
+      @sala_id = 1, @curso_id = 1, @semestre = '2026-2',
+      @dia_semana = 'Viernes', @hora_inicio = '08:00', @hora_fin = '10:00',
+      @perfil_permisos = 'administrador', @asignacion_id = @id OUTPUT;
+  SELECT @id;
+  ```
+**`sp_registrar_solicitud_permiso`** - Registra una nueva solicitud de permiso/software para un curso, protegiendo con una transacción los dos inserts relacionados (`SolicitudPermiso` + `HistorialSolicitud`). `SET XACT_ABORT ON`. Apoya el requisito funcional número 10.
+  ```sql
+  EXEC sp_registrar_solicitud_permiso
+      @curso_id = 1,
+      @software_solicitado = 'Godot Engine',
+      @justificacion = 'Curso electivo de videojuegos';
+  ```
+ **`sp_registrar_mantenimiento`** - registra un mantenimiento nuevo y cierra las incidencias abiertas del equipo asociado, usando `SAVE TRANSACTION` para no perder el mantenimiento si falla el cierre de incidencias.
+  ```sql
+  EXEC sp_registrar_mantenimiento
+      @equipo_id = 3, @tecnico_id = 1,
+      @tipo_mantenimiento = 'Correctivo',
+      @descripcion = 'Revision de pantalla', @costo = 30000.00;
+  ```
+
+## Scripts de prueba
+
+Ubicados en `sql-server/tests/`, formato `test_<numero>_<nombre_del_sp>.sql`. Cada uno incluye un caso que confirma el funcionamiento normal y un caso que fuerza un error para verificar que la transacción revierte correctamente.
+
 # Política de uso de IA
 Herramientas utilizadas: Claude (Anthropic).
 
