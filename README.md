@@ -126,7 +126,7 @@ Ubicadas en `sql-server/functions/`:
 Ubicados en `sql-server/triggers/`:
 
  **`trg_mantenimiento_actualiza_equipo`** - `AFTER INSERT` en `Mantenimiento`; pone `Equipo.estado = 'en mantenimiento'` automáticamente al registrar un mantenimiento nuevo.
- **`trg_historial_solicitud`** - `AFTER UPDATE` en `SolicitudPermiso`; registra en `HistorialSolicitud` cada cambio de estado de una solicitud. Apoya el RNF03 y el RF03.
+ **`trg_historial_solicitud`** - `AFTER UPDATE` en `SolicitudPermiso`; registra en `HistorialSolicitud` cada cambio de estado de una solicitud. Apoya el RNF-03 y el RF-10.
 
 ## CTEs
 
@@ -139,7 +139,7 @@ Ubicadas en `sql-server/queries/08_ctes_reportes.sql`:
 
 Ubicados en `sql-server/procedures/`:
 
-**`sp_asignar_curso_sala`** - Asigna un curso a una sala validando disponibilidad, y genera automáticamente los registros en `RequisitoPendiente` si la sala no cumple algún requisito obligatorio. Transacción con `SET XACT_ABORT ON` y `THROW`. Apoya el RRF01.
+**`sp_asignar_curso_sala`** - Asigna un curso a una sala validando disponibilidad, y genera automáticamente los registros en `RequisitoPendiente` si la sala no cumple algún requisito obligatorio. Transacción con `SET XACT_ABORT ON` y `THROW`. Apoya el RF-06.
   ```sql
   DECLARE @id INT;
   EXEC sp_asignar_curso_sala
