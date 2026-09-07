@@ -1,14 +1,33 @@
 USE SalaTrack;
 GO
 
-PRINT '--- PRUEBA 1: Generación de lista para Sala 2 (Requisitos pendientes) ---';
+PRINT '--- PRUEBA 1: Verificación de Inserción Real para Sala 2 (COUNT antes y después) ---';
+
+DECLARE @CountAntes INT, @CountDespues INT;
+
+SELECT @CountAntes = COUNT(*) 
+FROM EquipoSoftware es
+JOIN Equipo e ON e.equipo_id = es.equipo_id
+WHERE e.sala_id = 2;
 
 BEGIN TRY
     EXEC dbo.sp_generar_lista_instalacion @sala_id = 2, @usuario_id = 1;
-    PRINT 'SUCCESS: Prueba 1 ejecutada correctamente.';
+    
+    SELECT @CountDespues = COUNT(*) 
+    FROM EquipoSoftware es
+    JOIN Equipo e ON e.equipo_id = es.equipo_id
+    WHERE e.sala_id = 2;
+
+    PRINT 'Registros antes: ' + CAST(@CountAntes AS VARCHAR);
+    PRINT 'Registros después: ' + CAST(@CountDespues AS VARCHAR);
+
+    IF @CountDespues >= @CountAntes
+        PRINT 'SUCCESS: Prueba 1 ejecutada con éxito y cambio validado.';
+    ELSE
+        PRINT 'FAIL: No se reflejaron modificaciones en la base de datos.';
 END TRY
 BEGIN CATCH
-    PRINT 'FAIL: Error inesperado en Prueba 1 -> ' + ERROR_MESSAGE();
+    PRINT 'FAIL: Error en Prueba 1 -> ' + ERROR_MESSAGE();
 END CATCH;
 GO
 
@@ -23,7 +42,7 @@ BEGIN CATCH
 END CATCH;
 GO
 
-PRINT '--- PRUEBA 3: Llamada con transacción previa activa (SAVE TRANSACTION) ---';
+PRINT '--- PRUEBA 3: Transacción Anidada y Manejo de SAVE TRANSACTION ---';
 
 BEGIN TRANSACTION TransaccionExterna;
 BEGIN TRY

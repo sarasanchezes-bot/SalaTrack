@@ -38,16 +38,14 @@ BEGIN
         SAVE TRANSACTION SavePointGenerarLista;
 
     BEGIN TRY
-        INSERT INTO EquipoSoftware (equipo_id, software_id, estado_instalacion, fecha_instalacion)
+        INSERT INTO EquipoSoftware (equipo_id, software_id, nivel_permisos)
         SELECT DISTINCT
             e.equipo_id,
-            req.software_id,
-            'Pendiente' AS estado_instalacion,
-            GETDATE() AS fecha_instalacion
+            rc.software_id,
+            COALESCE(rc.nivel_permiso_necesario, 'estandar') AS nivel_permisos
         FROM Equipo e
         JOIN AsignacionSemestral a ON a.sala_id = e.sala_id
         JOIN RequisitoCurso rc ON rc.curso_id = a.curso_id
-        JOIN Software req ON req.software_id = rc.software_id
         WHERE e.sala_id = @sala_id
           AND a.estado <> 'cancelada'
           AND rc.es_obligatorio = 1
@@ -56,7 +54,7 @@ BEGIN
               SELECT 1 
               FROM EquipoSoftware es 
               WHERE es.equipo_id = e.equipo_id 
-                AND es.software_id = req.software_id
+                AND es.software_id = rc.software_id
           );
 
         DECLARE @filas_insertadas INT = @@ROWCOUNT;
