@@ -23,4 +23,10 @@
 - **Prompt usado:** Revisar la estructura básica del procedimiento almacenado "sp_registrar_solicitud_permiso" con el objetivo de mejorar su eficiencia o encontrar problemáticas.
 - **Decisión tomada:** se aceptó la estructura propuesta (validación del curso antes de insertar, BEGIN TRY/CATCH con ROLLBACK en caso de error), se recomendó un pequeño cambio adicional.
 
+### Procedimiento sp_registrar_mantenimiento (RF-09)
+- **Para qué:** Corregir el script de registrar mantenimiento para evitar posibles incidencias, mejorar calidad de código.
+- **Prompt usado:** Brindar recomendaciones y cambios para la reestructuración parcial de una transacción que proteja el insert del mantenimiento aunque el cierre de incidencias falle, sin perder el registro ya insertado.
+- **Decisión tomada:** Se usó `SAVE TRANSACTION` para el cierre de incidencias (un punto de guardado, no un rollback total). Se recomendó además, crear la tabla `Incidencia` (para la posibilidad de una integración en la próxima unidad de desarrollo del proyecto).
+
+
 <!-- Agregar nuevos registros a medida que se avanza -->
