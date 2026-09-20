@@ -59,8 +59,8 @@ En este documento se justifica por qué el diseño relacional de la base de dato
 * **Cumplimiento 3FN:** Tabla de auditoría atómica para rastrear transiciones de estado. Cada registro depende exclusivamente de `historial_id`.
 
 ### 12. `RequisitoPendiente`
-* **Atributos:** `pendiente_id` (PK), `asignacion_id` (FK), `requisito_curso_id` (FK), `fecha_deteccion`, `estado`.
-* **Cumplimiento 3FN:** Se normaliza referenciando directamente a la asignación semestral (`asignacion_id`) y al requisito específico del curso (`requisito_curso_id`), evitando duplicar referencias indirectas a salas o softwares. Toda la información del pendiente depende de `pendiente_id`.
+* **Atributos:** `pendiente_id` (PK), `asignacion_id` (FK), `requisito_curso_id` (FK), `motivo`, `detalle`, `fecha_deteccion`, `estado`.
+* **Cumplimiento 3FN:** Registra la falta o inconsistencia de software detectada. Incluye los campos atómicos `motivo` (validado mediante restricción CHECK para categorizar el tipo de pendiente) y `detalle` (descripción específica). Se conecta directamente con la asignación semestral y el requisito del curso sin duplicar datos del software o la sala. Toda la información del registro depende unívocamente de `pendiente_id`.
 
 ### 13. `Incidencia`
 * **Atributos:** `incidencia_id` (PK), `equipo_id` (FK), `descripcion`, `fecha_reporte`, `fecha_cierre`, `estado`.
