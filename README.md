@@ -53,7 +53,7 @@ Software — nombre, versión, tipo de licencia.
 
 EquipoSoftware — relación entre equipos y software instalado, con nivel de permisos asignado.
 
-Usuario — identificador, tipo (estudiante / docente / técnico / admin), programa académico.
+Tecnico — identificador, nombre, especialidad, estado activo. Es el único actor modelado en el módulo relacional, por ser quien ejecuta las operaciones transaccionales de mantenimiento. Docentes y estudiantes no se modelan como entidad aquí: el docente responsable es un atributo de Curso, y el estudiante aparece únicamente como reportante de incidencias, que se modelan en MongoDB en la Unidad 2 (RNF-02).
 
 Curso — id, nombre, código, programa académico, docente responsable, semestre.
 
@@ -65,7 +65,11 @@ Mantenimiento — equipo, técnico responsable, fecha, tipo, descripción, estad
 
 SolicitudPermiso — docente, sala, configuración o software requerido, justificación, estado.
 
-Incidencia — reporte de falla durante una sesión (estructura a definir en la unidad 2).
+HistorialSolicitud — registro de cada cambio de estado de una SolicitudPermiso, con estado anterior, estado nuevo y fecha. Da soporte a la trazabilidad exigida por el RNF-03.
+
+RequisitoPendiente — requisito obligatorio que una sala no cumple al momento de asignarle un curso, con motivo, detalle y estado. Se genera automáticamente desde sp_asignar_curso_sala y alimenta la lista de instalación del RF-07.
+
+Incidencia — tabla mínima en SQL Server que existe solo para que sp_registrar_mantenimiento pueda cerrar incidencias abiertas de un equipo. El modelo real de incidencias, con estructura variable por tipo, se implementa en MongoDB en la Unidad 2 (RNF-02).
 
 # 📏 Reglas de negocio
 1. Al asignar una sala a un curso, el sistema deberá verificar la compatibilidad entre los requisitos técnicos del curso y la dotación real de la sala (software instalado y niveles de permisos). Si la sala no cumple los requisitos obligatorios del curso, la asignación quedará marcada como "asignada con requisitos pendientes" y generará automáticamente las solicitudes de instalación o permisos correspondientes al área técnica.
