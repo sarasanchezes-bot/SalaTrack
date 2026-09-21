@@ -97,16 +97,20 @@ PRINT 'Segunda parte 2.2: sp_registrar_mantenimiento (SAVE TRANSACTION)';
 
 PRINT 'COMMIT: mantenimiento valido, cierra incidencia abierta';
 INSERT INTO Incidencia (equipo_id, descripcion, estado)
-VALUES (4, 'Teclado no responde', 'abierta');
+VALUES (5, 'Teclado no responde', 'abierta');
+
+PRINT 'Estado ANTES del EXEC:';
+SELECT estado FROM Equipo WHERE equipo_id = 5;
 
 EXEC sp_registrar_mantenimiento
-    @equipo_id = 4, @tecnico_id = 2,
+    @equipo_id = 5, @tecnico_id = 2,
     @tipo_mantenimiento = 'Correctivo',
     @descripcion = 'Demo en vivo, sustentacion Unidad 1',
     @costo = 25000.00;
 
-SELECT estado FROM Equipo WHERE equipo_id = 4;
-SELECT * FROM Incidencia WHERE equipo_id = 4;
+PRINT 'Estado DESPUES del EXEC:';
+SELECT estado FROM Equipo WHERE equipo_id = 5;
+SELECT * FROM Incidencia WHERE equipo_id = 5;
 GO
 
 PRINT 'ROLLBACK: equipo inexistente';
@@ -149,7 +153,7 @@ GO
 -- Tercera parte (Juan): Triggers
 
 PRINT 'Tercera parte 3.0: trg_mantenimiento_actualiza_equipo';
-PRINT 'El equipo 4 quedo en "en mantenimiento" sin ningun UPDATE manual.';
+PRINT 'Ya se usó en la parte 2.2, el SELECT antes mostro "disponible" y el de despues "en mantenimiento".';
 GO
 
 PRINT 'Tercera parte 3.1: trg_historial_solicitud';
