@@ -1,14 +1,16 @@
 # SalaTrack — Sistema de Gestión y Análisis de Salas de Cómputo
 
-Proyecto del curso Bases de Datos Avanzadas — Universidad Católica Luis Amigó
+Proyecto del curso **Bases de Datos Avanzadas** — Universidad Católica Luis Amigó
 
-Participantes y roles
-Usuario GitHub	Rol
-@sarasanchezes-bot	Líder de desarrollo 
-@pedromcleanwa-dev   Diseño de BD 
-@John3202026         Analítica
+## 👥 Participantes y roles
 
-# 📋 Descripción del problema
+| Usuario GitHub | Rol |
+|---|---|
+| [@sarasanchezes-bot](https://github.com/sarasanchezes-bot) | Líder de desarrollo |
+| [@pedromcleanwa-dev](https://github.com/pedromcleanwa-dev) | Diseño de BD |
+| [@John3202026](https://github.com/John3202026) | Analítica |
+
+## 📋 Descripción del problema
 
 Las salas de cómputo de la Universidad Católica Luis Amigó son un recurso crítico para las clases prácticas. Cada materia tiene necesidades técnicas distintas — un curso de bases de datos requiere un motor con protocolos habilitados, uno de videojuegos otras herramientas — pero no existe un sistema que registre qué ofrece realmente cada sala frente a lo que cada materia necesita, ni que deje evidencia de los problemas que ocurren durante las clases.
 
@@ -18,185 +20,436 @@ La consecuencia de fondo: la institución no tiene datos para decidir qué salas
 
 SalaTrack será un sistema backend que registrará qué ofrece cada sala, qué requiere cada curso y qué ocurre durante las sesiones, para convertir ese cruce en información útil para la toma de decisiones.
 
-Alcance: el sistema cubrirá las salas de clases y laboratorios: asignaciones semestrales, requisitos técnicos de cada curso frente a la dotación real de las salas, registro de incidencias, mantenimientos y análisis histórico. Queda fuera la reserva puntual de salas (que ya gestiona el sistema académico de la universidad), la gestión de las salas de la biblioteca (uso libre de estudiantes) y la administración de red e infraestructura física, que corresponde al área de sistemas.
+**Alcance:** el sistema cubrirá las salas de clases y laboratorios: asignaciones semestrales, requisitos técnicos de cada curso frente a la dotación real de las salas, registro de incidencias, mantenimientos y análisis histórico. Queda fuera la reserva puntual de salas (que ya gestiona el sistema académico de la universidad), la gestión de las salas de la biblioteca (uso libre de estudiantes) y la administración de red e infraestructura física, que corresponde al área de sistemas.
 
-# 🎯 Solución propuesta por unidades
+El documento de requisitos completo (RF y RNF) está en [`docs/requisitos.md`](docs/requisitos.md).
+
+## 🎯 Solución propuesta por unidades
 
 El sistema abordará el problema en tres grandes módulos, cada uno con la tecnología más adecuada según lo visto en el curso:
 
-Gestión operativa (Unidad 1 — SQL Server):
+**Gestión operativa (Unidad 1 — SQL Server):**
 Se planea modelar y gestionar salas, equipos, software instalado, requisitos técnicos por curso, asignaciones semestrales y mantenimientos. Esta parte del sistema requerirá integridad transaccional y validaciones de compatibilidad entre lo que cada curso necesita y lo que cada sala ofrece, por lo que se trabajará sobre una base de datos relacional. Se explorarán herramientas avanzadas de SQL Server como stored procedures, triggers y CTEs a medida que se avance en el curso.
 
-Registro de eventos e incidencias (Unidad 2 — bases de datos no relacionales):
+**Registro de eventos e incidencias (Unidad 2 — bases de datos no relacionales):**
 Las incidencias reportadas durante las sesiones de clase son datos de naturaleza variable: una falla de hardware no tiene los mismos campos que un problema de permisos o un error de software. Por esta razón se planea explorar el uso de una base de datos no relacional para este módulo, que permita registrar cada incidencia con la estructura que mejor se adapte a su tipo, sin forzar un esquema fijo.
 
-Analítica para toma de decisiones (Unidad 3 — arquitecturas de datos en la nube):
+**Analítica para toma de decisiones (Unidad 3 — arquitecturas de datos en la nube):**
 Se planea construir un módulo de análisis histórico que permita identificar patrones de uso, equipos con mayor frecuencia de falla y necesidades de inversión. El enfoque y las herramientas concretas de esta unidad se definirán a medida que se avance en los contenidos del curso.
 
-# 👥 Posibles usuarios del sistema
-Estudiantes: utilizarán las salas en el marco de sus clases asignadas. No realizarán reservas directas — para trabajo autónomo cuentan con las salas de la biblioteca. Su rol en el sistema será reportar incidencias técnicas durante las sesiones (equipo que no enciende, software que no funciona, restricciones que impiden el desarrollo de la clase).
+| Unidad | Módulo | Estado |
+|---|---|---|
+| 1 | Base de datos relacional — SQL Server | ✅ Implementada |
+| 2 | Base de datos documental — MongoDB | ⏳ Por desarrollar |
+| 3 | Analítica y Data Warehouse | ⏳ Por desarrollar |
 
-Docentes: registrarán los requisitos técnicos de sus cursos, solicitarán permisos o software adicional cuando sea necesario, y reportarán incidencias relacionadas con configuraciones que afecten sus clases.
+## 👤 Posibles usuarios del sistema
 
-Técnicos de soporte: registrarán y gestionarán mantenimientos, atenderán las incidencias reportadas y administrarán las configuraciones de software por sala.
+**Estudiantes:** utilizarán las salas en el marco de sus clases asignadas. No realizarán reservas directas — para trabajo autónomo cuentan con las salas de la biblioteca. Su rol en el sistema será reportar incidencias técnicas durante las sesiones (equipo que no enciende, software que no funciona, restricciones que impiden el desarrollo de la clase).
 
-Coordinación académica / administrativa: gestionará las asignaciones semestrales, consultará reportes analíticos y tomará decisiones de inversión o reposición de equipos.
+**Docentes:** registrarán los requisitos técnicos de sus cursos, solicitarán permisos o software adicional cuando sea necesario, y reportarán incidencias relacionadas con configuraciones que afecten sus clases.
 
-# 🗂️ Lista preliminar de entidades
+**Técnicos de soporte:** registrarán y gestionarán mantenimientos, atenderán las incidencias reportadas y administrarán las configuraciones de software por sala.
+
+**Coordinación académica / administrativa:** gestionará las asignaciones semestrales, consultará reportes analíticos y tomará decisiones de inversión o reposición de equipos.
+
+## 🗂️ Modelo de datos
+
+### Diagrama entidad-relación
+
+```mermaid
+erDiagram
+    Sala                ||--o{ Equipo              : contiene
+    Sala                ||--o{ AsignacionSemestral : "se asigna en"
+    Equipo              ||--o{ EquipoSoftware      : tiene
+    Equipo              ||--o{ Mantenimiento       : recibe
+    Equipo              ||--o{ Incidencia          : reporta
+    Software            ||--o{ EquipoSoftware      : "instalado en"
+    Software            |o--o{ RequisitoCurso      : "requerido en"
+    Tecnico             ||--o{ Mantenimiento       : realiza
+    Curso               ||--o{ RequisitoCurso      : define
+    Curso               ||--o{ AsignacionSemestral : "se dicta en"
+    Curso               ||--o{ SolicitudPermiso    : solicita
+    SolicitudPermiso    ||--o{ HistorialSolicitud  : registra
+    AsignacionSemestral ||--o{ RequisitoPendiente  : genera
+    RequisitoCurso      ||--o{ RequisitoPendiente  : origina
+
+    Sala {
+        int sala_id PK
+        nvarchar nombre
+        nvarchar ubicacion
+        int capacidad
+        nvarchar estado
+    }
+
+    Equipo {
+        int equipo_id PK
+        int sala_id FK
+        nvarchar especificaciones
+        nvarchar estado
+    }
+
+    Software {
+        int software_id PK
+        nvarchar nombre
+        nvarchar version
+        nvarchar tipo_licencia
+    }
+
+    EquipoSoftware {
+        int equipo_id PK "FK"
+        int software_id PK "FK"
+        nvarchar nivel_permisos
+    }
+
+    Curso {
+        int curso_id PK
+        nvarchar nombre
+        nvarchar codigo UK
+        nvarchar programa_academico
+        nvarchar docente_responsable
+        nvarchar semestre UK
+    }
+
+    RequisitoCurso {
+        int requisito_curso_id PK
+        int curso_id FK
+        int software_id FK "nullable"
+        nvarchar descripcion_configuracion
+        nvarchar nivel_permiso_necesario
+        bit es_obligatorio
+    }
+
+    AsignacionSemestral {
+        int asignacion_id PK
+        int sala_id FK
+        int curso_id FK
+        nvarchar semestre
+        nvarchar dia_semana
+        time hora_inicio
+        time hora_fin
+        nvarchar perfil_permisos
+        nvarchar estado
+    }
+
+    Tecnico {
+        int tecnico_id PK
+        varchar nombre
+        varchar especialidad
+        bit activo
+    }
+
+    Mantenimiento {
+        int mantenimiento_id PK
+        int equipo_id FK
+        int tecnico_id FK
+        datetime fecha_mantenimiento
+        varchar tipo_mantenimiento
+        varchar descripcion
+        decimal costo
+        varchar estado
+    }
+
+    SolicitudPermiso {
+        int solicitud_id PK
+        int curso_id FK
+        nvarchar software_solicitado
+        nvarchar justificacion
+        datetime fecha_solicitud
+        nvarchar estado
+    }
+
+    HistorialSolicitud {
+        int historial_id PK
+        int solicitud_id FK
+        nvarchar estado_anterior
+        nvarchar estado_nuevo
+        datetime fecha_cambio
+    }
+
+    RequisitoPendiente {
+        int pendiente_id PK
+        int asignacion_id FK
+        int requisito_curso_id FK
+        nvarchar motivo
+        nvarchar detalle
+        datetime2 fecha_deteccion
+        nvarchar estado
+    }
+
+    Incidencia {
+        int incidencia_id PK
+        int equipo_id FK
+        nvarchar descripcion
+        datetime fecha_reporte
+        nvarchar estado
+        datetime fecha_cierre
+    }
+```
+
+La justificación de normalización hasta 3FN de las 13 tablas está en [`docs/normalizacion.md`](docs/normalizacion.md).
+
+### Lista de entidades
+
 Esta lista representa una aproximación inicial al modelo de datos. Se espera que evolucione a medida que se avance en los contenidos del curso.
 
-Sala — identificador, nombre, ubicación, capacidad, estado.
+**Sala** — identificador, nombre, ubicación, capacidad, estado.
 
-Equipo — identificador, sala a la que pertenece, especificaciones básicas, estado.
+**Equipo** — identificador, sala a la que pertenece, especificaciones básicas, estado.
 
-Software — nombre, versión, tipo de licencia.
+**Software** — nombre, versión, tipo de licencia.
 
-EquipoSoftware — relación entre equipos y software instalado, con nivel de permisos asignado.
+**EquipoSoftware** — relación entre equipos y software instalado, con nivel de permisos asignado.
 
-Tecnico — identificador, nombre, especialidad, estado activo. Es el único actor modelado en el módulo relacional, por ser quien ejecuta las operaciones transaccionales de mantenimiento. Docentes y estudiantes no se modelan como entidad aquí: el docente responsable es un atributo de Curso, y el estudiante aparece únicamente como reportante de incidencias, que se modelan en MongoDB en la Unidad 2 (RNF-02).
+**Tecnico** — identificador, nombre, especialidad, estado activo. Es el único actor modelado en el módulo relacional, por ser quien ejecuta las operaciones transaccionales de mantenimiento. Docentes y estudiantes no se modelan como entidad aquí: el docente responsable es un atributo de Curso, y el estudiante aparece únicamente como reportante de incidencias, que se modelan en MongoDB en la Unidad 2 (RNF-02).
 
-Curso — id, nombre, código, programa académico, docente responsable, semestre.
+**Curso** — id, nombre, código, programa académico, docente responsable, semestre.
 
-RequisitoCurso — curso, software o configuración requerida, nivel de permisos necesario, obligatorio u opcional.
+**RequisitoCurso** — curso, software o configuración requerida, nivel de permisos necesario, obligatorio u opcional.
 
-AsignacionSemestral — sala, curso, horario fijo (día, hora inicio, hora fin), semestre, perfil de permisos aplicado a la sala.
+**AsignacionSemestral** — sala, curso, horario fijo (día, hora inicio, hora fin), semestre, perfil de permisos aplicado a la sala.
 
-Mantenimiento — equipo, técnico responsable, fecha, tipo, descripción, estado.
+**Mantenimiento** — equipo, técnico responsable, fecha, tipo, descripción, estado.
 
-SolicitudPermiso — docente, sala, configuración o software requerido, justificación, estado.
+**SolicitudPermiso** — docente, sala, configuración o software requerido, justificación, estado.
 
-HistorialSolicitud — registro de cada cambio de estado de una SolicitudPermiso, con estado anterior, estado nuevo y fecha. Da soporte a la trazabilidad exigida por el RNF-03.
+**HistorialSolicitud** — registro de cada cambio de estado de una SolicitudPermiso, con estado anterior, estado nuevo y fecha. Da soporte a la trazabilidad exigida por el RNF-03.
 
-RequisitoPendiente — requisito obligatorio que una sala no cumple al momento de asignarle un curso, con motivo, detalle y estado. Se genera automáticamente desde sp_asignar_curso_sala y alimenta la lista de instalación del RF-07.
+**RequisitoPendiente** — requisito obligatorio que una sala no cumple al momento de asignarle un curso, con motivo, detalle y estado. Se genera automáticamente desde `sp_asignar_curso_sala` y alimenta la lista de instalación del RF-07.
 
-Incidencia — tabla mínima en SQL Server que existe solo para que sp_registrar_mantenimiento pueda cerrar incidencias abiertas de un equipo. El modelo real de incidencias, con estructura variable por tipo, se implementa en MongoDB en la Unidad 2 (RNF-02).
+**Incidencia** — tabla mínima en SQL Server que existe solo para que `sp_registrar_mantenimiento` pueda cerrar incidencias abiertas de un equipo. El modelo real de incidencias, con estructura variable por tipo, se implementa en MongoDB en la Unidad 2 (RNF-02).
 
-# 📏 Reglas de negocio
+## 📏 Reglas de negocio
+
 1. Al asignar una sala a un curso, el sistema deberá verificar la compatibilidad entre los requisitos técnicos del curso y la dotación real de la sala (software instalado y niveles de permisos). Si la sala no cumple los requisitos obligatorios del curso, la asignación quedará marcada como "asignada con requisitos pendientes" y generará automáticamente las solicitudes de instalación o permisos correspondientes al área técnica.
-2. Al iniciar un nuevo semestre, el sistema deberá generar automáticamente la lista de software y configuraciones a instalar en cada sala, a partir de los cursos asignados y sus requisitos técnicos. Esto entrega al área de sistemas una guía estructurada para la preparación de los equipos, en lugar de depender de solicitudes dispersas o de la memoria de semestres anteriores. 
-3. El perfil de permisos de una sala estará asociado a su asignación semestral vigente y solo podrá ser modificado por un administrador, no por docentes ni estudiantes.
-Un equipo en estado "en mantenimiento" o "fuera de servicio" no podrá ser contado como parte de la capacidad operativa de una sala al momento de validar una asignación.
-4. Toda incidencia reportada durante una sesión de clase deberá ser atendida antes de la siguiente sesión del mismo curso en esa sala. El sistema llevará registro formal de cada incidencia — sala, equipo, clase afectada y estado de atención — para garantizar trazabilidad y evitar que problemas recurrentes queden sin respuesta institucional.
-5. La acumulación de incidencias repetidas en un mismo equipo dentro de un período corto deberá generar automáticamente una alerta de mantenimiento, evitando que equipos problemáticos sigan en uso sin intervención técnica.
-6. Toda solicitud de permiso o configuración adicional realizada por un docente deberá ser respondida — aprobada o rechazada con justificación — antes de la siguiente sesión del curso solicitante.
-7. El sistema llevará registro del estado y tiempo de respuesta de cada solicitud, para que las restricciones que afectan el desarrollo de las clases tengan un canal formal de gestión.
-   
-# 🤔 ¿Por qué este proyecto es suficientemente complejo?
 
-1. El problema es real y multidimensional:
+2. Al iniciar un nuevo semestre, el sistema deberá generar automáticamente la lista de software y configuraciones a instalar en cada sala, a partir de los cursos asignados y sus requisitos técnicos. Esto entrega al área de sistemas una guía estructurada para la preparación de los equipos, en lugar de depender de solicitudes dispersas o de la memoria de semestres anteriores.
+
+3. El perfil de permisos de una sala estará asociado a su asignación semestral vigente y solo podrá ser modificado por un administrador, no por docentes ni estudiantes.
+
+4. Un equipo en estado "en mantenimiento" o "fuera de servicio" no podrá ser contado como parte de la capacidad operativa de una sala al momento de validar una asignación.
+
+5. Toda incidencia reportada durante una sesión de clase deberá ser atendida antes de la siguiente sesión del mismo curso en esa sala. El sistema llevará registro formal de cada incidencia — sala, equipo, clase afectada y estado de atención — para garantizar trazabilidad y evitar que problemas recurrentes queden sin respuesta institucional.
+
+6. La acumulación de incidencias repetidas en un mismo equipo dentro de un período corto deberá generar automáticamente una alerta de mantenimiento, evitando que equipos problemáticos sigan en uso sin intervención técnica.
+
+7. Toda solicitud de permiso o configuración adicional realizada por un docente deberá ser respondida — aprobada o rechazada con justificación — antes de la siguiente sesión del curso solicitante.
+
+8. El sistema llevará registro del estado y tiempo de respuesta de cada solicitud, para que las restricciones que afectan el desarrollo de las clases tengan un canal formal de gestión.
+
+## 🤔 ¿Por qué este proyecto es suficientemente complejo?
+
+**1. El problema es real y multidimensional:**
 No se trata de un ejercicio académico genérico. El sistema busca resolver una situación concreta que ocurre en la propia institución, con usuarios reales, restricciones reales y decisiones reales de por medio. Eso implica modelar matices que no aparecen en ejemplos de libro.
 
-2. Lógica de compatibilidad entre necesidades y recursos:
+**2. Lógica de compatibilidad entre necesidades y recursos:**
 El sistema deberá cruzar los requisitos técnicos de cada curso contra la dotación real de cada sala (software instalado y niveles de permisos), detectar brechas y generar acciones a partir de ellas — solicitudes automáticas al área técnica, alertas de incompatibilidad, seguimiento de resolución. Esta lógica va más allá del CRUD básico.
 
-3. Datos de distinta naturaleza que justifican distintas tecnologías:
+**3. Datos de distinta naturaleza que justifican distintas tecnologías:**
 Las operaciones transaccionales (asignaciones, mantenimientos, solicitudes) y los eventos variables (incidencias) tienen características distintas que justifican aproximaciones diferentes al almacenamiento, lo cual conecta directamente con los objetivos del curso.
 
-4. Orientación a decisiones reales:
+**4. Orientación a decisiones reales:**
 El módulo analítico no será decorativo — buscará responder preguntas concretas: qué equipos deben reemplazarse, qué horarios tienen mayor demanda, qué cursos generan más incidencias. Información que una coordinación académica real necesitaría para tomar decisiones de inversión.
 
-# Objetos de base de datos (Unidad 1 - SQL Server)
+## 🚀 Puesta en marcha
 
-Esta sección describe los objetos ya implementados sobre el módulo relacional, y cómo ejecutarlos. 
+### Requisitos previos
 
-## Vistas
+- SQL Server 2022 en ejecución (local o en Docker, puerto 1433)
+- Un cliente SQL: VS Code con la extensión **MSSQL**, Azure Data Studio o `sqlcmd`
+
+### Opción A — Script maestro (recomendada)
+
+[`sql-server/00_deploy_all.sql`](sql-server/00_deploy_all.sql) reconstruye la base de datos completa desde cero, en orden de dependencias: esquema, seeds, vistas, función, procedimientos y triggers.
+
+> ⚠️ Requiere **SQLCMD mode** activado, porque usa `:r` para incluir los demás archivos.
+> En VS Code: icono *Enable SQLCMD* en la barra del editor de consultas. Con `sqlcmd` funciona por defecto.
+>
+> ⚠️ La sección 0 del script **borra la base de datos `SalaTrack` si ya existe**.
+
+Ejecutar desde la carpeta `sql-server/`, ya que las rutas son relativas:
+
+```bash
+cd sql-server
+sqlcmd -S localhost,1433 -U sa -C -i 00_deploy_all.sql
+```
+
+### Opción B — Archivo plano (plan B si SQLCMD mode no activa)
+
+[`build_deploy_flat.sh`](sql-server/build_deploy_flat.sh) concatena los mismos archivos, en el mismo orden, en un único `.sql` que se ejecuta tal cual:
+
+```bash
+cd sql-server
+bash build_deploy_flat.sh      # genera 00_deploy_all_flat.sql
+```
+
+El archivo generado está en `.gitignore` y no se versiona: para cambiar su contenido se editan los archivos fuente y se vuelve a correr el script.
+
+### Verificar que quedó bien
+
+```sql
+USE SalaTrack;
+GO
+SELECT * FROM vw_verificacion_compatibilidad;
+```
+
+### Demostración
+
+[`sql-server/demo/demo_unidad1.sql`](sql-server/demo/demo_unidad1.sql) recorre en orden todos los objetos de la Unidad 1 y sirve como guion de la sustentación oral.
+
+## 🗄️ Objetos de base de datos (Unidad 1 — SQL Server)
+
+Esta sección describe los objetos ya implementados sobre el módulo relacional, y cómo ejecutarlos.
+
+### Vistas
 
 Ubicadas en `sql-server/views/`:
 
- **`vw_verificacion_compatibilidad`** (`verificar_compatibilidad.sql`) - Dada una sala y un curso, indica si la sala cumple los requisitos obligatorios del curso, cruzando `RequisitoCurso` contra `EquipoSoftware`. Apoya el requisito funcional número 6.
-  ```sql
-  SELECT * FROM vw_verificacion_compatibilidad;
-  ```
-**`vw_lista_instalacion`** (`lista_instalacion.sql`) - Agrupa por sala el software obligatorio que le falta instalar. Apoya el requisito funcional número 7.
-  ```sql
-  SELECT * FROM vw_lista_instalacion;
-  ```
-**`vw_requisitos_por_curso`** (`requisitos_por_curso.sql`) - Lista, por curso, sus requisitos técnicos separando obligatorios de opcionales. Apoya el requisito funcional número 5.
-  ```sql
-  SELECT * FROM vw_requisitos_por_curso ORDER BY curso_id, categoria;
-  ```
+**`vw_verificacion_compatibilidad`** (`verificar_compatibilidad.sql`) — Dada una sala y un curso, indica si la sala cumple los requisitos obligatorios del curso, cruzando `RequisitoCurso` contra `EquipoSoftware`. Apoya el RF-06.
+```sql
+SELECT * FROM vw_verificacion_compatibilidad;
+```
 
-## Funciones
+**`vw_lista_instalacion`** (`lista_instalacion.sql`) — Agrupa por sala el software obligatorio que le falta instalar. Apoya el RF-07.
+```sql
+SELECT * FROM vw_lista_instalacion;
+```
+
+**`vw_requisitos_por_curso`** (`requisitos_por_curso.sql`) — Lista, por curso, sus requisitos técnicos separando obligatorios de opcionales. Apoya el RF-05.
+```sql
+SELECT * FROM vw_requisitos_por_curso ORDER BY curso_id, categoria;
+```
+
+### Funciones
 
 Ubicadas en `sql-server/functions/`:
 
- **`fn_requisitos_pendientes_sala(@sala_id)`** - Función de tabla que, para una sala dada, devuelve el software obligatorio que le falta a partir de sus asignaciones vigentes.
-  ```sql
-  SELECT * FROM fn_requisitos_pendientes_sala(1);
-  ```
+**`fn_requisitos_pendientes_sala(@sala_id)`** — Función de tabla que, para una sala dada, devuelve el software obligatorio que le falta a partir de sus asignaciones vigentes.
+```sql
+SELECT * FROM fn_requisitos_pendientes_sala(1);
+```
 
-## Triggers
+### Triggers
 
 Ubicados en `sql-server/triggers/`:
 
- **`trg_mantenimiento_actualiza_equipo`** - `AFTER INSERT` en `Mantenimiento`; pone `Equipo.estado = 'en mantenimiento'` automáticamente al registrar un mantenimiento nuevo.
- **`trg_historial_solicitud`** - `AFTER UPDATE` en `SolicitudPermiso`; registra en `HistorialSolicitud` cada cambio de estado de una solicitud. Apoya el RNF-03 y el RF-10.
+**`trg_mantenimiento_actualiza_equipo`** — `AFTER INSERT` en `Mantenimiento`; pone `Equipo.estado = 'en mantenimiento'` automáticamente al registrar un mantenimiento nuevo.
 
-## CTEs
+**`trg_historial_solicitud`** — `AFTER UPDATE` en `SolicitudPermiso`; registra en `HistorialSolicitud` cada cambio de estado de una solicitud. Apoya el RNF-03 y el RF-10.
+
+### CTEs
 
 Ubicadas en `sql-server/queries/08_ctes_reportes.sql`:
 
- **CTE 1** - Ranking de salas por cantidad de requisitos obligatorios faltantes, usando `RANK()`.
-**CTE 2 (recursiva)** - Genera el calendario completo de sesiones de clase de cada asignación semestral. Apoya el requisito funcional número 11.
+**CTE 1** — Ranking de salas por cantidad de requisitos obligatorios faltantes, usando `RANK()`.
 
-## Procedimientos almacenados
+**CTE 2 (recursiva)** — Genera el calendario completo de sesiones de clase de cada asignación semestral. Apoya el RF-11.
+
+### Procedimientos almacenados
 
 Ubicados en `sql-server/procedures/`:
 
-**`sp_asignar_curso_sala`** - Asigna un curso a una sala validando disponibilidad, y genera automáticamente los registros en `RequisitoPendiente` si la sala no cumple algún requisito obligatorio. Transacción con `SET XACT_ABORT ON` y `THROW`. Apoya el RF-06.
-  ```sql
-  DECLARE @id INT;
-  EXEC sp_asignar_curso_sala
-      @sala_id = 1, @curso_id = 1, @semestre = '2026-2',
-      @dia_semana = 'Viernes', @hora_inicio = '08:00', @hora_fin = '10:00',
-      @perfil_permisos = 'administrador', @asignacion_id = @id OUTPUT;
-  SELECT @id;
-  ```
-**`sp_registrar_solicitud_permiso`** - Registra una nueva solicitud de permiso/software para un curso, protegiendo con una transacción los dos inserts relacionados (`SolicitudPermiso` + `HistorialSolicitud`). `SET XACT_ABORT ON`. Apoya el requisito funcional número 10.
-  ```sql
-  EXEC sp_registrar_solicitud_permiso
-      @curso_id = 1,
-      @software_solicitado = 'Godot Engine',
-      @justificacion = 'Curso electivo de videojuegos';
-  ```
- **`sp_registrar_mantenimiento`** - registra un mantenimiento nuevo y cierra las incidencias abiertas del equipo asociado, usando `SAVE TRANSACTION` para no perder el mantenimiento si falla el cierre de incidencias.
-  ```sql
-  EXEC sp_registrar_mantenimiento
-      @equipo_id = 3, @tecnico_id = 1,
-      @tipo_mantenimiento = 'Correctivo',
-      @descripcion = 'Revision de pantalla', @costo = 30000.00;
-  ```
+**`sp_asignar_curso_sala`** — Asigna un curso a una sala validando disponibilidad, y genera automáticamente los registros en `RequisitoPendiente` si la sala no cumple algún requisito obligatorio. Transacción con `SET XACT_ABORT ON` y `THROW`. Apoya el RF-06.
+```sql
+DECLARE @id INT;
+EXEC sp_asignar_curso_sala
+    @sala_id = 1, @curso_id = 1, @semestre = '2026-2',
+    @dia_semana = 'Viernes', @hora_inicio = '08:00', @hora_fin = '10:00',
+    @perfil_permisos = 'administrador', @asignacion_id = @id OUTPUT;
+SELECT @id;
+```
 
-## Scripts de prueba
+**`sp_registrar_mantenimiento`** — Registra un mantenimiento nuevo y cierra las incidencias abiertas del equipo asociado, usando `SAVE TRANSACTION` para no perder el mantenimiento si falla el cierre de incidencias.
+```sql
+EXEC sp_registrar_mantenimiento
+    @equipo_id = 3, @tecnico_id = 1,
+    @tipo_mantenimiento = 'Correctivo',
+    @descripcion = 'Revision de pantalla', @costo = 30000.00;
+```
+
+**`sp_generar_lista_instalacion`** — Genera la lista de software y configuraciones a instalar por sala para un semestre, a partir de los cursos asignados y sus requisitos. Apoya el RF-07 y la regla de negocio 2.
+
+**`sp_registrar_solicitud_permiso`** — Registra una nueva solicitud de permiso/software para un curso, protegiendo con una transacción los dos inserts relacionados (`SolicitudPermiso` + `HistorialSolicitud`). `SET XACT_ABORT ON`. Apoya el RF-10.
+```sql
+EXEC sp_registrar_solicitud_permiso
+    @curso_id = 1,
+    @software_solicitado = 'Godot Engine',
+    @justificacion = 'Curso electivo de videojuegos';
+```
+
+### Scripts de prueba
 
 Ubicados en `sql-server/tests/`, formato `test_<numero>_<nombre_del_sp>.sql`. Cada uno incluye un caso que confirma el funcionamiento normal y un caso que fuerza un error para verificar que la transacción revierte correctamente.
 
-# Política de uso de IA
-Herramientas utilizadas: Claude (Anthropic).
+## 📁 Estructura del repositorio
 
-Cómo se ha usado hasta ahora:
+```
+SalaTrack/
+├── README.md
+├── .gitignore
+│
+├── docs/                                  # Documentación del proyecto
+│   ├── requisitos.md                      # Requisitos funcionales y no funcionales
+│   ├── normalizacion.md                   # Justificación 3FN de las 13 tablas
+│   └── ia-log.md                          # Bitácora de uso de IA
+│
+├── sql-server/                            # Unidad 1 — módulo relacional
+│   ├── 00_deploy_all.sql                  # Script maestro de despliegue
+│   ├── build_deploy_flat.sh               # Generador del script plano (plan B)
+│   ├── schema/                            # DDL: creación de tablas y relaciones
+│   ├── seeds/                             # Datos de prueba
+│   ├── views/                             # Vistas de consulta
+│   ├── functions/                         # Funciones de tabla
+│   ├── procedures/                        # Procedimientos almacenados
+│   ├── triggers/                          # Triggers de reglas de negocio
+│   ├── queries/                           # CTEs y consultas de reporte
+│   ├── tests/                             # Pruebas de los procedimientos
+│   └── demo/                              # Guion de la sustentación oral
+│
+├── mongodb/                               # Unidad 2 — módulo documental
+└── data-warehouse/                        # Unidad 3 — módulo analítico
+```
+
+## 🔀 Flujo de trabajo
+
+| Rama | Uso |
+|---|---|
+| `main` | Rama protegida. Solo recibe cambios por pull request aprobado; sin force-push ni borrado. |
+| `dev` | Rama de integración donde se consolidan los avances. |
+| `feature/<nombre>` | Una rama por funcionalidad. Se abre desde `dev` y vuelve a `dev` por PR. |
+
+El merge a `main` lo realiza la líder de desarrollo. Los demás integrantes abren pull requests, que se revisan antes de integrarse.
+
+## 🤖 Política de uso de IA
+
+**Herramientas utilizadas:** Claude (Anthropic).
+
+**Cómo se ha usado hasta ahora:**
 Durante la fase de definición del proyecto se utilizó IA para explorar distintos dominios posibles y evaluar su viabilidad. La herramienta propuso varios enfoques que fueron descartados por no reflejar un problema cercano o suficientemente real. La selección final del dominio surgió de la experiencia directa de la autora como estudiante de la institución. La IA también se usó para orientar qué tipos de tecnologías podrían ser adecuadas para cada módulo del sistema — una decisión que la autora no podía tomar con certeza por no haber cursado aún las unidades 2 y 3. Esa orientación tecnológica se tomó como punto de partida provisional, sujeta a ajuste a medida que avance el curso.
 
-Usos planificados durante el desarrollo:
+**Usos durante el desarrollo:**
 
-Apoyo en la escritura de consultas y estructuras técnicas, las cuales serán revisadas y comprendidas antes de incorporarse.
-Generación de datos de prueba para poblar las bases de datos.
-Revisión y retroalimentación sobre decisiones de modelado.
+- Apoyo en la escritura de consultas y estructuras técnicas, las cuales son revisadas y comprendidas antes de incorporarse.
+- Generación de datos de prueba para poblar las bases de datos.
+- Revisión y retroalimentación sobre decisiones de modelado.
 
-Ejemplos de prompts utilizados:
+**Ejemplos de prompts utilizados:**
 
 Los siguientes son ejemplos representativos del tipo de consultas realizadas a la IA durante la definición del proyecto. En todos los casos, el contexto y el problema fueron aportados por la autora, y la IA se usó para validar, refinar o resolver dudas puntuales:
 
-"En esa clase el profe se quejaba de un problema real en la universidad: las salas de cómputo tienen software instalado pero con permisos restringidos que no dejan configurar cosas en clase. Quiero construir mi proyecto de bases de datos sobre esto. ¿Este problema da para usar bases de datos relacionales, no relacionales y análisis de datos, o se queda corto? Aparte quiero que me sugieras más ideas por si el mío no sirve para el uso de las bases de datos que ya te mencioné."
+> "En esa clase el profe se quejaba de un problema real en la universidad: las salas de cómputo tienen software instalado pero con permisos restringidos que no dejan configurar cosas en clase. Quiero construir mi proyecto de bases de datos sobre esto. ¿Este problema da para usar bases de datos relacionales, no relacionales y análisis de datos, o se queda corto? Aparte quiero que me sugieras más ideas por si el mío no sirve para el uso de las bases de datos que ya te mencioné."
 
-"El sistema académico de mi universidad ya permite reservar salas, así que no quiero duplicar eso. Mi enfoque sería el cruce entre lo que cada materia necesita y lo que cada sala realmente tiene. ¿Cómo modelo los requisitos técnicos de un curso como entidad?"
+> "El sistema académico de mi universidad ya permite reservar salas, así que no quiero duplicar eso. Mi enfoque sería el cruce entre lo que cada materia necesita y lo que cada sala realmente tiene. ¿Cómo modelo los requisitos técnicos de un curso como entidad?"
 
-"Los estudiantes en mi universidad no reservan salas porque usan las de la biblioteca. ¿Cómo debería ajustar el rol del estudiante en mi sistema para que sea coherente con eso?"
+> "Los estudiantes en mi universidad no reservan salas porque usan las de la biblioteca. ¿Cómo debería ajustar el rol del estudiante en mi sistema para que sea coherente con eso?"
 
-Compromisos:
+El registro completo de interacciones —qué se preguntó, qué se aceptó y qué se descartó en cada caso— se lleva en [`docs/ia-log.md`](docs/ia-log.md) y se actualiza a medida que avanza el proyecto.
 
-Todo lo generado con IA será revisado y comprendido por la autora antes de ser commiteado.
+**Compromisos:**
 
-En la defensa oral se podrán explicar y justificar todas las decisiones de diseño.
+- Todo lo generado con IA es revisado y comprendido por el equipo antes de ser commiteado.
+- En la defensa oral se pueden explicar y justificar todas las decisiones de diseño.
 
-Los prompts utilizados se documentarán progresivamente en un documento aprte según lo requiera el profesor.
+---
+
+<sub>Proyecto académico — Bases de Datos Avanzadas, Universidad Católica Luis Amigó.</sub>
