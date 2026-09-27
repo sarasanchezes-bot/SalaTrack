@@ -1,0 +1,127 @@
+erDiagram
+    Sala                ||--o{ Equipo              : contiene
+    Sala                ||--o{ AsignacionSemestral : "se asigna en"
+    Equipo              ||--o{ EquipoSoftware      : tiene
+    Equipo              ||--o{ Mantenimiento       : recibe
+    Equipo              ||--o{ Incidencia          : reporta
+    Software            ||--o{ EquipoSoftware      : "instalado en"
+    Software            |o--o{ RequisitoCurso      : "requerido en"
+    Tecnico             ||--o{ Mantenimiento       : realiza
+    Curso               ||--o{ RequisitoCurso      : define
+    Curso               ||--o{ AsignacionSemestral : "se dicta en"
+    Curso               ||--o{ SolicitudPermiso    : solicita
+    SolicitudPermiso    ||--o{ HistorialSolicitud  : registra
+    AsignacionSemestral ||--o{ RequisitoPendiente  : genera
+    RequisitoCurso      ||--o{ RequisitoPendiente  : origina
+
+    Sala {
+        int sala_id PK
+        nvarchar nombre
+        nvarchar ubicacion
+        int capacidad
+        nvarchar estado
+    }
+
+    Equipo {
+        int equipo_id PK
+        int sala_id FK
+        nvarchar especificaciones
+        nvarchar estado
+    }
+
+    Software {
+        int software_id PK
+        nvarchar nombre
+        nvarchar version
+        nvarchar tipo_licencia
+    }
+
+    EquipoSoftware {
+        int equipo_id PK "FK"
+        int software_id PK "FK"
+        nvarchar nivel_permisos
+    }
+
+    Curso {
+        int curso_id PK
+        nvarchar nombre
+        nvarchar codigo UK
+        nvarchar programa_academico
+        nvarchar docente_responsable
+        nvarchar semestre UK
+    }
+
+    RequisitoCurso {
+        int requisito_curso_id PK
+        int curso_id FK
+        int software_id FK "nullable"
+        nvarchar descripcion_configuracion
+        nvarchar nivel_permiso_necesario
+        bit es_obligatorio
+    }
+
+    AsignacionSemestral {
+        int asignacion_id PK
+        int sala_id FK
+        int curso_id FK
+        nvarchar semestre
+        nvarchar dia_semana
+        time hora_inicio
+        time hora_fin
+        nvarchar perfil_permisos
+        nvarchar estado
+    }
+
+    Tecnico {
+        int tecnico_id PK
+        varchar nombre
+        varchar especialidad
+        bit activo
+    }
+
+    Mantenimiento {
+        int mantenimiento_id PK
+        int equipo_id FK
+        int tecnico_id FK
+        datetime fecha_mantenimiento
+        varchar tipo_mantenimiento
+        varchar descripcion
+        decimal costo
+        varchar estado
+    }
+
+    SolicitudPermiso {
+        int solicitud_id PK
+        int curso_id FK
+        nvarchar software_solicitado
+        nvarchar justificacion
+        datetime fecha_solicitud
+        nvarchar estado
+    }
+
+    HistorialSolicitud {
+        int historial_id PK
+        int solicitud_id FK
+        nvarchar estado_anterior
+        nvarchar estado_nuevo
+        datetime fecha_cambio
+    }
+
+    RequisitoPendiente {
+        int pendiente_id PK
+        int asignacion_id FK
+        int requisito_curso_id FK
+        nvarchar motivo
+        nvarchar detalle
+        datetime2 fecha_deteccion
+        nvarchar estado
+    }
+
+    Incidencia {
+        int incidencia_id PK
+        int equipo_id FK
+        nvarchar descripcion
+        datetime fecha_reporte
+        nvarchar estado
+        datetime fecha_cierre
+    }
