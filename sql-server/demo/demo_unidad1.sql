@@ -6,7 +6,6 @@ USE SalaTrack;
 GO
 
 -- Apertura: Nuestro Problema, alcance y diagrama ER
--- (Mostremos el README.md y docs/diagramas/salatrack_er.png)
 
 
 
