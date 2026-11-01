@@ -1,2 +1,3 @@
 .DS_Store
 sql-server/00_deploy_all_flat.sql
+node_modules/

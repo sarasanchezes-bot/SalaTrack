@@ -28,5 +28,7 @@
 - **Prompt usado:** Brindar recomendaciones y cambios para la reestructuración parcial de una transacción que proteja el insert del mantenimiento aunque el cierre de incidencias falle, sin perder el registro ya insertado.
 - **Decisión tomada:** Se usó `SAVE TRANSACTION` para el cierre de incidencias (un punto de guardado, no un rollback total). Se recomendó además, crear la tabla `Incidencia` (para la posibilidad de una integración en la próxima unidad de desarrollo del proyecto).
 
-
-<!-- Agregar nuevos registros a medida que se avanza -->
+## Modelado documental de incidencias, migración de salas, índices y validación (Unidad 2, MongoDB)
+- **Para qué:** Reimaginar el código, brindar ayuda y proponer mejoras para la elaboración del documento de la Unidad 2, migrar la colección salas desde SQL Server y definir los índices del esquema.
+- **Prompt usado:** Se entregaron algunos fragmentos de código con varios errores, con el objetivo de recibir ayuda en la elaboración del documento escrito de la Unidad 2 y en la reestructuración del proyecto en MongoDB.
+- **Decisión tomada:** Se adoptó una colección incidencias con una estructura variable en el campo detalle, según el tipo de incidencia (hardware, software o permisos). Se incluyeron los datos comunes, el historial y la información de atención dentro del mismo documento, mientras que la sala se mantuvo referenciada mediante sala_id para permitir el uso de $lookup. Como alternativa, se proporcionó un documento organizado con recomendaciones sobre el hardware y el software que se utilizarían en la unidad de MongoDB. Además, se reorganizó el código y se implementaron ciertas características importantes que no estaban presentes en el código original.

@@ -1,0 +1,20 @@
+{
+  "name": "salatrack-migracion-mongodb",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Migracion de la coleccion salas desde SQL Server hacia MongoDB (SalaTrack, Unidad 2)",
+  "scripts": {
+    "migrar": "node migrar_salas.js",
+    "migrar:prueba": "node migrar_salas.js --dry-run"
+  },
+  "engines": {
+    "node": ">=18.19"
+  },
+  "dependencies": {
+    "mongodb": "^6.21.0",
+    "mssql": "^12.7.13"
+  },
+  "optionalDependencies": {
+    "msnodesqlv8": "^5.3.0 || ^6.2.1"
+  }
+}
