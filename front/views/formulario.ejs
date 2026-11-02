@@ -1,0 +1,238 @@
+<%- include("encabezado") %>
+
+<h2><%= incidencia ? "Editar incidencia" : "Registrar incidencia" %></h2>
+
+<% if (incidencia) { %>
+  <%# En edicion solo se cambian los campos comunes. El tipo y el
+      detalle no se tocan porque cambiarlos cambiaria la forma del
+      documento y habria que validarlo de nuevo completo. %>
+  <p class="origen">Tipo <strong><%= incidencia.tipo %></strong>. Si cambias el estado se agrega un elemento al historial.</p>
+
+  <form method="POST" action="/incidencias/<%= incidencia._id %>" class="formulario">
+    <label>Descripcion
+      <textarea name="descripcion" rows="3" required minlength="10"><%= incidencia.descripcion %></textarea>
+    </label>
+
+    <label>Severidad
+      <select name="severidad">
+        <% severidades.forEach(function (s) { %>
+          <option value="<%= s %>" <%= incidencia.severidad === s ? "selected" : "" %>><%= s %></option>
+        <% }); %>
+      </select>
+    </label>
+
+    <label>Estado
+      <select name="estado">
+        <% estados.forEach(function (e) { %>
+          <option value="<%= e %>" <%= incidencia.estado === e ? "selected" : "" %>><%= e %></option>
+        <% }); %>
+      </select>
+    </label>
+
+    <label>Quien hace el cambio
+      <input type="text" name="nombre_reporta" value="<%= incidencia.reportado_por.nombre %>">
+    </label>
+
+    <div class="botones">
+      <button type="submit" class="boton">Guardar cambios</button>
+      <a href="/incidencias">Cancelar</a>
+    </div>
+  </form>
+
+  <h3>Historial</h3>
+  <ul class="historial">
+    <% incidencia.historial.forEach(function (paso) { %>
+      <li>
+        <strong><%= paso.estado %></strong>
+        &mdash; <%= paso.fecha.toISOString().slice(0, 16).replace("T", " ") %>
+        <% if (paso.por) { %> &mdash; <%= paso.por %><% } %>
+        <% if (paso.nota) { %><br><span class="nota"><%= paso.nota %></span><% } %>
+      </li>
+    <% }); %>
+  </ul>
+
+<% } else { %>
+
+  <form method="POST" action="/incidencias" class="formulario">
+
+    <label>Tipo
+      <select name="tipo" id="tipo" required onchange="mostrarDetalle()">
+        <% tipos.forEach(function (t) { %>
+          <option value="<%= t %>"><%= t %></option>
+        <% }); %>
+      </select>
+    </label>
+
+    <label>Sala
+      <select name="sala_id" id="sala_id" required onchange="cargarEquipos()">
+        <% salas.forEach(function (sala) { %>
+          <option value="<%= sala.sala_id %>"><%= sala.nombre %></option>
+        <% }); %>
+      </select>
+    </label>
+
+    <label>Equipo (opcional)
+      <select name="equipo_id" id="equipo_id">
+        <option value="">Toda la sala</option>
+      </select>
+    </label>
+
+    <label>Curso afectado
+      <select name="curso_id" required>
+        <% catalogoCursos.forEach(function (c) { %>
+          <option value="<%= c.curso_id %>"><%= c.codigo %> &mdash; <%= c.nombre %></option>
+        <% }); %>
+      </select>
+    </label>
+
+    <label>Descripcion
+      <textarea name="descripcion" rows="3" required minlength="10"
+                placeholder="Minimo 10 caracteres"></textarea>
+    </label>
+
+    <div class="fila">
+      <label>Severidad
+        <select name="severidad" required>
+          <% severidades.forEach(function (s) { %>
+            <option value="<%= s %>"><%= s %></option>
+          <% }); %>
+        </select>
+      </label>
+
+      <label>Estado
+        <select name="estado" required>
+          <% estados.forEach(function (e) { %>
+            <option value="<%= e %>"><%= e %></option>
+          <% }); %>
+        </select>
+      </label>
+
+      <label>Impacto en la clase
+        <select name="impacto_clase">
+          <option value="">Sin especificar</option>
+          <option value="ninguno">ninguno</option>
+          <option value="parcial">parcial</option>
+          <option value="total">total</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="fila">
+      <label>Reportado por
+        <input type="text" name="nombre_reporta" required minlength="2">
+      </label>
+
+      <label>Rol
+        <select name="rol_reporta" required>
+          <option value="estudiante">estudiante</option>
+          <option value="docente">docente</option>
+        </select>
+      </label>
+    </div>
+
+    <%# ------------------------------------------------------
+        Detalle variable: se muestra uno u otro bloque segun el
+        tipo elegido. Es la parte del documento que cambia.
+        ------------------------------------------------------ %>
+
+    <fieldset id="detalle-hardware" class="detalle-bloque">
+      <legend>Detalle de hardware</legend>
+      <label>Componente
+        <input type="text" name="componente" placeholder="fuente de poder, teclado...">
+      </label>
+      <label>Sintoma
+        <input type="text" name="sintoma" placeholder="apagado intermitente...">
+      </label>
+      <label>El equipo enciende
+        <select name="enciende">
+          <option value="si">si</option>
+          <option value="no">no</option>
+        </select>
+      </label>
+    </fieldset>
+
+    <fieldset id="detalle-software" class="detalle-bloque">
+      <legend>Detalle de software</legend>
+      <label>Programa
+        <select name="software_id">
+          <% catalogoSoftware.forEach(function (s) { %>
+            <option value="<%= s.software_id %>"><%= s.nombre %> <%= s.version %></option>
+          <% }); %>
+        </select>
+      </label>
+      <label>Mensaje de error
+        <input type="text" name="mensaje_error">
+      </label>
+      <label>Se puede reproducir
+        <select name="reproducible">
+          <option value="si">si</option>
+          <option value="no">no</option>
+        </select>
+      </label>
+    </fieldset>
+
+    <fieldset id="detalle-permisos" class="detalle-bloque">
+      <legend>Detalle de permisos</legend>
+      <label>Accion bloqueada
+        <input type="text" name="accion_bloqueada" placeholder="Habilitar TCP/IP...">
+      </label>
+      <div class="fila">
+        <label>Nivel actual
+          <select name="nivel_actual">
+            <% niveles.forEach(function (n) { %>
+              <option value="<%= n %>"><%= n %></option>
+            <% }); %>
+          </select>
+        </label>
+        <label>Nivel requerido
+          <select name="nivel_requerido">
+            <% niveles.forEach(function (n) { %>
+              <option value="<%= n %>" <%= n === "administrador" ? "selected" : "" %>><%= n %></option>
+            <% }); %>
+          </select>
+        </label>
+      </div>
+    </fieldset>
+
+    <div class="botones">
+      <button type="submit" class="boton">Guardar</button>
+      <a href="/incidencias">Cancelar</a>
+    </div>
+  </form>
+
+  <script>
+    // Equipos de cada sala, tal como vienen embebidos en el
+    // documento de la sala en MongoDB.
+    const EQUIPOS_POR_SALA = <%- JSON.stringify(
+      salas.reduce(function (acumulado, sala) {
+        acumulado[sala.sala_id] = (sala.equipos || []).map(e => e.equipo_id);
+        return acumulado;
+      }, {})
+    ) %>;
+
+    function mostrarDetalle() {
+      const tipo = document.getElementById("tipo").value;
+      ["hardware", "software", "permisos"].forEach(function (t) {
+        document.getElementById("detalle-" + t).style.display = (t === tipo) ? "block" : "none";
+      });
+    }
+
+    function cargarEquipos() {
+      const sala = document.getElementById("sala_id").value;
+      const select = document.getElementById("equipo_id");
+      select.innerHTML = '<option value="">Toda la sala</option>';
+      (EQUIPOS_POR_SALA[sala] || []).forEach(function (id) {
+        const opcion = document.createElement("option");
+        opcion.value = id;
+        opcion.textContent = "Equipo " + id;
+        select.appendChild(opcion);
+      });
+    }
+
+    mostrarDetalle();
+    cargarEquipos();
+  </script>
+
+<% } %>
+
+<%- include("pie") %>

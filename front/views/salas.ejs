@@ -1,0 +1,41 @@
+<%- include("encabezado") %>
+
+<h2>Salas y equipos</h2>
+<p class="origen">Tablas <code>Sala</code> y <code>Equipo</code> de SQL Server</p>
+
+<% if (error) { %>
+  <div class="aviso">
+    <strong>No se pudo consultar SQL Server.</strong>
+    <p><%= error %></p>
+    <p>Revisa que el contenedor este arriba y que la variable SQL_PASSWORD este definida.</p>
+  </div>
+<% } else { %>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Id</th>
+        <th>Nombre</th>
+        <th>Ubicacion</th>
+        <th>Capacidad</th>
+        <th>Equipos</th>
+        <th>Estado</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% salas.forEach(function (sala) { %>
+        <tr>
+          <td><%= sala.sala_id %></td>
+          <td><%= sala.nombre %></td>
+          <td><%= sala.ubicacion %></td>
+          <td><%= sala.capacidad %></td>
+          <td><%= sala.equipos %></td>
+          <td><span class="estado"><%= sala.estado %></span></td>
+        </tr>
+      <% }); %>
+    </tbody>
+  </table>
+
+<% } %>
+
+<%- include("pie") %>

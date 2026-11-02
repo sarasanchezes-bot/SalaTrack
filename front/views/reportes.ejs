@@ -1,0 +1,55 @@
+<%- include("encabezado") %>
+
+<h2>Reportes</h2>
+<p class="origen">Agregaciones sobre MongoDB (los mismos pipelines de <code>mongodb/consultas.js</code>)</p>
+
+<section class="reporte">
+  <h3>1. Salas con mas incidencias</h3>
+  <p class="pipeline"><code>$group</code> &rarr; <code>$sort</code> &rarr; <code>$limit</code></p>
+  <table>
+    <thead><tr><th>Sala (id)</th><th>Incidencias</th></tr></thead>
+    <tbody>
+      <% porSala.forEach(function (fila) { %>
+        <tr><td><%= fila._id %></td><td><%= fila.total %></td></tr>
+      <% }); %>
+    </tbody>
+  </table>
+  <p class="nota">El resultado trae el numero de la sala, no su nombre: el nombre vive en la coleccion <code>salas</code>.</p>
+</section>
+
+<section class="reporte destacado">
+  <h3>2. Salas con mas incidencias, con el nombre</h3>
+  <p class="pipeline"><code>$group</code> &rarr; <code>$lookup</code> &rarr; <code>$unwind</code> &rarr; <code>$project</code> &rarr; <code>$sort</code></p>
+  <table>
+    <thead><tr><th>Sala</th><th>Ubicacion</th><th>Incidencias</th></tr></thead>
+    <tbody>
+      <% porSalaConNombre.forEach(function (fila) { %>
+        <tr>
+          <td><%= fila.nombre %></td>
+          <td><%= fila.ubicacion %></td>
+          <td><%= fila.total %></td>
+        </tr>
+      <% }); %>
+    </tbody>
+  </table>
+  <p class="nota">El nombre y la ubicacion nacieron en SQL Server y llegaron a MongoDB por la migracion. Sin esa migracion no habria <code>$lookup</code>, porque <code>$lookup</code> no sale de la base de datos.</p>
+</section>
+
+<section class="reporte">
+  <h3>3. Software con mas incidencias</h3>
+  <p class="pipeline"><code>$match</code> &rarr; <code>$group</code> &rarr; <code>$sort</code></p>
+  <table>
+    <thead><tr><th>Programa</th><th>Incidencias</th></tr></thead>
+    <tbody>
+      <% if (porSoftware.length === 0) { %>
+        <tr><td colspan="2" class="vacio">No hay incidencias de tipo software.</td></tr>
+      <% } %>
+      <% porSoftware.forEach(function (fila) { %>
+        <tr><td><%= fila._id %></td><td><%= fila.total %></td></tr>
+      <% }); %>
+    </tbody>
+  </table>
+  <p class="nota">Solo las incidencias de tipo software tienen <code>detalle.software</code>. Las de hardware guardan otros campos.</p>
+</section>
+
+<%- include("pie") %>

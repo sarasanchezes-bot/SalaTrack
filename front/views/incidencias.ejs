@@ -1,0 +1,82 @@
+<%- include("encabezado") %>
+
+<div class="barra">
+  <div>
+    <h2>Incidencias</h2>
+    <p class="origen">Coleccion <code>incidencias</code> de MongoDB</p>
+  </div>
+  <a href="/incidencias/nueva" class="boton">Registrar incidencia</a>
+</div>
+
+<form method="GET" action="/incidencias" class="filtro">
+  <label for="sala_id">Filtrar por sala:</label>
+  <select name="sala_id" id="sala_id">
+    <option value="">Todas</option>
+    <% salas.forEach(function (sala) { %>
+      <option value="<%= sala.sala_id %>" <%= String(sala.sala_id) === String(filtroSala) ? "selected" : "" %>>
+        <%= sala.nombre %>
+      </option>
+    <% }); %>
+  </select>
+  <button type="submit">Aplicar</button>
+</form>
+
+<p class="conteo"><%= lista.length %> incidencia(s)</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Fecha</th>
+      <th>Tipo</th>
+      <th>Sala</th>
+      <th>Descripcion</th>
+      <th>Severidad</th>
+      <th>Estado</th>
+      <th>Detalle</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <% if (lista.length === 0) { %>
+      <tr><td colspan="8" class="vacio">No hay incidencias registradas.</td></tr>
+    <% } %>
+
+    <% lista.forEach(function (inc) { %>
+      <tr>
+        <td><%= inc.fecha_reporte ? inc.fecha_reporte.toISOString().slice(0, 10) : "" %></td>
+        <td><span class="etiqueta tipo-<%= inc.tipo %>"><%= inc.tipo %></span></td>
+        <td>
+          <% const sala = salas.find(s => s.sala_id === inc.sala_id); %>
+          <%= sala ? sala.nombre : "sala " + inc.sala_id %>
+        </td>
+        <td class="descripcion"><%= inc.descripcion %></td>
+        <td><%= inc.severidad %></td>
+        <td><span class="estado estado-<%= inc.estado %>"><%= inc.estado %></span></td>
+
+        <td class="detalle">
+          <%# El detalle cambia de forma segun el tipo: esa es la
+              razon de modelar esta entidad como documento %>
+          <% if (inc.tipo === "hardware" && inc.detalle) { %>
+            <%= inc.detalle.componente %>: <%= inc.detalle.sintoma %>
+          <% } else if (inc.tipo === "software" && inc.detalle) { %>
+            <%= inc.detalle.software ? inc.detalle.software.nombre : "" %> &mdash;
+            <%= inc.detalle.mensaje_error %>
+          <% } else if (inc.tipo === "permisos" && inc.detalle) { %>
+            <%= inc.detalle.accion_bloqueada %>
+            (<%= inc.detalle.nivel_actual %> &rarr; <%= inc.detalle.nivel_requerido %>)
+          <% } %>
+        </td>
+
+        <td class="acciones">
+          <a href="/incidencias/<%= inc._id %>/editar">Editar</a>
+          <form method="POST" action="/incidencias/<%= inc._id %>/eliminar"
+                onsubmit="return confirm('Eliminar esta incidencia?');">
+            <button type="submit" class="borrar">Eliminar</button>
+          </form>
+        </td>
+      </tr>
+    <% }); %>
+  </tbody>
+</table>
+
+<%- include("pie") %>
