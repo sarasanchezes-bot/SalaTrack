@@ -94,10 +94,13 @@ app.get("/", function (peticion, respuesta) {
 // INCIDENCIAS (MongoDB) - listar
 // ------------------------------------------------------------
 app.get("/incidencias", async function (peticion, respuesta) {
-  // Filtro opcional por sala, llega como ?sala_id=1
+  // Filtros opcionales, llegan como ?sala_id=1&estado=abierta
   const filtro = {};
   if (peticion.query.sala_id) {
     filtro.sala_id = Number(peticion.query.sala_id);
+  }
+  if (peticion.query.estado) {
+    filtro.estado = peticion.query.estado;
   }
 
   const lista = await incidencias
@@ -105,9 +108,24 @@ app.get("/incidencias", async function (peticion, respuesta) {
     .sort({ fecha_reporte: -1 })
     .toArray();
 
+  // Conteo por estado para el resumen de arriba (sobre el total,
+  // no sobre lo filtrado).
+  const porEstado = await incidencias.aggregate([
+    { $group: { _id: "$estado", total: { $sum: 1 } } }
+  ]).toArray();
+
+  const conteos = {};
+  porEstado.forEach(function (fila) { conteos[fila._id] = fila.total; });
+
   const salas = await salasDeMongo();
 
-  respuesta.render("incidencias", { lista, salas, filtroSala: peticion.query.sala_id || "" });
+  respuesta.render("incidencias", {
+    lista,
+    salas,
+    conteos,
+    filtroSala: peticion.query.sala_id || "",
+    filtroEstado: peticion.query.estado || ""
+  });
 });
 
 
@@ -140,7 +158,9 @@ app.post("/incidencias", async function (peticion, respuesta) {
     respuesta.redirect("/incidencias");
   } catch (error) {
     respuesta.status(400).render("error", {
-      titulo: "MongoDB rechazo el documento",
+      titulo: "Falta información en el reporte",
+      guia: "Algunos campos obligatorios quedaron vacíos o con un valor que no se acepta.",
+      volver: "/incidencias/nueva",
       mensaje: explicarError(error)
     });
   }
@@ -205,7 +225,9 @@ app.post("/incidencias/:id", async function (peticion, respuesta) {
     respuesta.redirect("/incidencias");
   } catch (error) {
     respuesta.status(400).render("error", {
-      titulo: "MongoDB rechazo la actualizacion",
+      titulo: "No se pudo guardar el cambio",
+      guia: "Alguno de los datos no cumple lo que el sistema espera.",
+      volver: "/incidencias",
       mensaje: explicarError(error)
     });
   }
@@ -223,10 +245,15 @@ app.post("/incidencias/:id/eliminar", async function (peticion, respuesta) {
 
 
 // ------------------------------------------------------------
-// SALAS (SQL Server) - solo lectura
+// SALAS (SQL Server) - CRUD completo, RF-01
 // ------------------------------------------------------------
-// Esta pagina no toca MongoDB: consulta directamente las tablas
-// relacionales de la Unidad 1.
+// Esta pagina no toca MongoDB: escribe y lee directamente sobre
+// las tablas relacionales de la Unidad 1.
+//
+// Importante: SQL Server es la fuente de verdad de las salas.
+// La coleccion 'salas' de MongoDB es una copia que llega por la
+// migracion, asi que una sala nueva no aparece en el filtro de
+// incidencias hasta que esa migracion se vuelva a correr.
 // ------------------------------------------------------------
 app.get("/salas", async function (peticion, respuesta) {
   try {
@@ -238,9 +265,126 @@ app.get("/salas", async function (peticion, respuesta) {
       GROUP BY s.sala_id, s.nombre, s.ubicacion, s.capacidad, s.estado
       ORDER BY s.sala_id
     `);
-    respuesta.render("salas", { salas: resultado.recordset, error: null });
+
+    // Equipos de cada sala con su estado, para dibujar la sala
+    // como la rejilla de maquinas que realmente es.
+    const equipos = await poolSql.request().query(`
+      SELECT equipo_id, sala_id, estado
+      FROM Equipo
+      ORDER BY sala_id, equipo_id
+    `);
+
+    const porSala = {};
+    equipos.recordset.forEach(function (eq) {
+      (porSala[eq.sala_id] = porSala[eq.sala_id] || []).push(eq);
+    });
+
+    const salas = resultado.recordset.map(function (sala) {
+      sala.maquinas = porSala[sala.sala_id] || [];
+      return sala;
+    });
+
+    respuesta.render("salas", {
+      salas,
+      error: null,
+      aviso: peticion.query.aviso || null
+    });
   } catch (error) {
-    respuesta.render("salas", { salas: [], error: error.message });
+    respuesta.render("salas", { salas: [], error: error.message, aviso: null });
+  }
+});
+
+
+// SALAS - crear (INSERT)
+// Los valores van como parametros con .input(), no concatenados
+// dentro del texto de la consulta: asi el motor los trata como
+// datos y no como SQL (evita inyeccion).
+app.post("/salas", async function (peticion, respuesta) {
+  try {
+    await poolSql.request()
+      .input("nombre", sql.NVarChar(50), peticion.body.nombre)
+      .input("ubicacion", sql.NVarChar(100), peticion.body.ubicacion)
+      .input("capacidad", sql.Int, Number(peticion.body.capacidad))
+      .input("estado", sql.NVarChar(20), peticion.body.estado)
+      .query(`
+        INSERT INTO Sala (nombre, ubicacion, capacidad, estado)
+        VALUES (@nombre, @ubicacion, @capacidad, @estado)
+      `);
+
+    respuesta.redirect("/salas?aviso=creada");
+  } catch (error) {
+    respuesta.status(400).render("error", {
+      titulo: "No se pudo registrar la sala",
+      guia: "Revisa que el número de puestos sea mayor que cero.",
+      volver: "/salas",
+      mensaje: error.message
+    });
+  }
+});
+
+
+// SALAS - formulario de edicion
+app.get("/salas/:id/editar", async function (peticion, respuesta) {
+  const resultado = await poolSql.request()
+    .input("id", sql.Int, Number(peticion.params.id))
+    .query("SELECT sala_id, nombre, ubicacion, capacidad, estado FROM Sala WHERE sala_id = @id");
+
+  respuesta.render("formulario_sala", { sala: resultado.recordset[0] });
+});
+
+
+// SALAS - actualizar (UPDATE)
+app.post("/salas/:id", async function (peticion, respuesta) {
+  try {
+    await poolSql.request()
+      .input("id", sql.Int, Number(peticion.params.id))
+      .input("nombre", sql.NVarChar(50), peticion.body.nombre)
+      .input("ubicacion", sql.NVarChar(100), peticion.body.ubicacion)
+      .input("capacidad", sql.Int, Number(peticion.body.capacidad))
+      .input("estado", sql.NVarChar(20), peticion.body.estado)
+      .query(`
+        UPDATE Sala
+        SET nombre = @nombre, ubicacion = @ubicacion,
+            capacidad = @capacidad, estado = @estado
+        WHERE sala_id = @id
+      `);
+
+    respuesta.redirect("/salas?aviso=actualizada");
+  } catch (error) {
+    respuesta.status(400).render("error", {
+      titulo: "No se pudieron guardar los cambios",
+      guia: "Revisa que el número de puestos sea mayor que cero.",
+      volver: "/salas",
+      mensaje: error.message
+    });
+  }
+});
+
+
+// SALAS - eliminar (DELETE)
+// Si la sala tiene equipos, la llave foranea FK_Equipo_Sala lo
+// impide. No se fuerza el borrado: se explica el motivo, que es
+// justamente la integridad referencial del modelo relacional.
+app.post("/salas/:id/eliminar", async function (peticion, respuesta) {
+  try {
+    await poolSql.request()
+      .input("id", sql.Int, Number(peticion.params.id))
+      .query("DELETE FROM Sala WHERE sala_id = @id");
+
+    respuesta.redirect("/salas?aviso=eliminada");
+  } catch (error) {
+    const esLlaveForanea = error.message.indexOf("REFERENCE constraint") !== -1;
+
+    respuesta.status(400).render("error", {
+      titulo: esLlaveForanea
+        ? "La sala todavía tiene equipos"
+        : "No se pudo eliminar la sala",
+      guia: esLlaveForanea
+        ? "Para eliminarla, primero hay que reubicar o dar de baja los equipos que están en ella."
+        : "Vuelve a intentarlo en unos minutos.",
+      volver: "/salas",
+      mensaje: error.message
+    });
   }
 });
 

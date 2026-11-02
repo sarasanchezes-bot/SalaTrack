@@ -1,82 +1,116 @@
 <%- include("encabezado") %>
 
-<div class="barra">
+<div class="cabecera">
   <div>
     <h2>Incidencias</h2>
-    <p class="origen">Coleccion <code>incidencias</code> de MongoDB</p>
+    <p>Lo que se ha reportado durante las sesiones de clase</p>
   </div>
-  <a href="/incidencias/nueva" class="boton">Registrar incidencia</a>
+  <a href="/incidencias/nueva" class="boton">Reportar incidencia</a>
 </div>
 
-<form method="GET" action="/incidencias" class="filtro">
-  <label for="sala_id">Filtrar por sala:</label>
-  <select name="sala_id" id="sala_id">
-    <option value="">Todas</option>
-    <% salas.forEach(function (sala) { %>
-      <option value="<%= sala.sala_id %>" <%= String(sala.sala_id) === String(filtroSala) ? "selected" : "" %>>
-        <%= sala.nombre %>
-      </option>
-    <% }); %>
-  </select>
-  <button type="submit">Aplicar</button>
+<div class="resumen">
+  <div class="abiertas">
+    <span class="cifra"><%= conteos.abierta || 0 %></span>
+    <span class="rotulo">Sin atender</span>
+  </div>
+  <div class="atencion">
+    <span class="cifra"><%= conteos.en_atencion || 0 %></span>
+    <span class="rotulo">En atención</span>
+  </div>
+  <div class="cerradas">
+    <span class="cifra"><%= conteos.cerrada || 0 %></span>
+    <span class="rotulo">Resueltas</span>
+  </div>
+</div>
+
+<form method="GET" action="/incidencias" class="filtros">
+  <div>
+    <label for="sala_id">Sala</label>
+    <select name="sala_id" id="sala_id">
+      <option value="">Todas</option>
+      <% salas.forEach(function (sala) { %>
+        <option value="<%= sala.sala_id %>" <%= String(sala.sala_id) === String(filtroSala) ? "selected" : "" %>>
+          <%= sala.nombre %>
+        </option>
+      <% }); %>
+    </select>
+  </div>
+
+  <div>
+    <label for="estado">Estado</label>
+    <select name="estado" id="estado">
+      <option value="">Todos</option>
+      <option value="abierta" <%= filtroEstado === "abierta" ? "selected" : "" %>>Sin atender</option>
+      <option value="en_atencion" <%= filtroEstado === "en_atencion" ? "selected" : "" %>>En atención</option>
+      <option value="cerrada" <%= filtroEstado === "cerrada" ? "selected" : "" %>>Resueltas</option>
+    </select>
+  </div>
+
+  <button type="submit" class="boton-tenue">Filtrar</button>
 </form>
 
-<p class="conteo"><%= lista.length %> incidencia(s)</p>
+<% if (lista.length === 0) { %>
 
-<table>
-  <thead>
-    <tr>
-      <th>Fecha</th>
-      <th>Tipo</th>
-      <th>Sala</th>
-      <th>Descripcion</th>
-      <th>Severidad</th>
-      <th>Estado</th>
-      <th>Detalle</th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
-    <% if (lista.length === 0) { %>
-      <tr><td colspan="8" class="vacio">No hay incidencias registradas.</td></tr>
-    <% } %>
+  <div class="vacio">
+    <p>No hay incidencias con estos criterios.</p>
+    <a href="/incidencias/nueva" class="boton">Reportar incidencia</a>
+  </div>
 
+<% } else { %>
+
+  <div class="registros">
     <% lista.forEach(function (inc) { %>
-      <tr>
-        <td><%= inc.fecha_reporte ? inc.fecha_reporte.toISOString().slice(0, 10) : "" %></td>
-        <td><span class="etiqueta tipo-<%= inc.tipo %>"><%= inc.tipo %></span></td>
-        <td>
-          <% const sala = salas.find(s => s.sala_id === inc.sala_id); %>
-          <%= sala ? sala.nombre : "sala " + inc.sala_id %>
-        </td>
-        <td class="descripcion"><%= inc.descripcion %></td>
-        <td><%= inc.severidad %></td>
-        <td><span class="estado estado-<%= inc.estado %>"><%= inc.estado %></span></td>
+      <% const sala = salas.find(s => s.sala_id === inc.sala_id); %>
 
-        <td class="detalle">
-          <%# El detalle cambia de forma segun el tipo: esa es la
-              razon de modelar esta entidad como documento %>
-          <% if (inc.tipo === "hardware" && inc.detalle) { %>
-            <%= inc.detalle.componente %>: <%= inc.detalle.sintoma %>
-          <% } else if (inc.tipo === "software" && inc.detalle) { %>
-            <%= inc.detalle.software ? inc.detalle.software.nombre : "" %> &mdash;
-            <%= inc.detalle.mensaje_error %>
-          <% } else if (inc.tipo === "permisos" && inc.detalle) { %>
-            <%= inc.detalle.accion_bloqueada %>
-            (<%= inc.detalle.nivel_actual %> &rarr; <%= inc.detalle.nivel_requerido %>)
+      <article class="registro es-<%= inc.estado %>">
+        <div class="cuerpo">
+          <p class="titulo">
+            <a href="/incidencias/<%= inc._id %>/editar"><%= inc.descripcion %></a>
+          </p>
+
+          <p class="contexto">
+            <span><%= sala ? sala.nombre : "Sala " + inc.sala_id %></span>
+            <% if (inc.equipo_id) { %><span class="dato">EQ-<%= String(inc.equipo_id).padStart(2, "0") %></span><% } %>
+            <% if (inc.curso && inc.curso.codigo) { %><span class="dato"><%= inc.curso.codigo %></span><% } %>
+            <span class="dato"><%= inc.fecha_reporte ? inc.fecha_reporte.toLocaleDateString("es-CO", { day: "2-digit", month: "2-digit", year: "2-digit" }) : "" %></span>
+            <% if (inc.reportado_por) { %><span><%= inc.reportado_por.nombre %></span><% } %>
+          </p>
+
+          <%# Lo que se muestra aqui cambia segun el tipo de incidencia %>
+          <% if (inc.detalle) { %>
+            <% if (inc.tipo === "hardware" && inc.detalle.componente) { %>
+              <p class="hallazgo"><%= inc.detalle.componente %>: <%= inc.detalle.sintoma %></p>
+            <% } else if (inc.tipo === "software" && inc.detalle.mensaje_error) { %>
+              <p class="hallazgo">
+                <% if (inc.detalle.software) { %><%= inc.detalle.software.nombre %> &mdash; <% } %>
+                <%= inc.detalle.mensaje_error %>
+              </p>
+            <% } else if (inc.tipo === "permisos" && inc.detalle.accion_bloqueada) { %>
+              <p class="hallazgo">
+                <%= inc.detalle.accion_bloqueada %>.
+                Permiso actual <%= inc.detalle.nivel_actual %>, se necesita <%= inc.detalle.nivel_requerido %>.
+              </p>
+            <% } %>
           <% } %>
-        </td>
+        </div>
 
-        <td class="acciones">
-          <a href="/incidencias/<%= inc._id %>/editar">Editar</a>
-          <form method="POST" action="/incidencias/<%= inc._id %>/eliminar"
-                onsubmit="return confirm('Eliminar esta incidencia?');">
-            <button type="submit" class="borrar">Eliminar</button>
-          </form>
-        </td>
-      </tr>
+        <div class="costado">
+          <span class="marca-estado">
+            <%= inc.estado === "abierta" ? "Sin atender" : (inc.estado === "en_atencion" ? "En atención" : "Resuelta") %>
+          </span>
+          <span class="severidad">Severidad <%= inc.severidad %></span>
+          <span class="enlaces">
+            <a href="/incidencias/<%= inc._id %>/editar">Abrir</a>
+            <form method="POST" action="/incidencias/<%= inc._id %>/eliminar"
+                  onsubmit="return confirm('Eliminar este reporte?');">
+              <button type="submit" class="borrar">Eliminar</button>
+            </form>
+          </span>
+        </div>
+      </article>
     <% }); %>
-  </tbody>
-</table>
+  </div>
+
+<% } %>
 
 <%- include("pie") %>
