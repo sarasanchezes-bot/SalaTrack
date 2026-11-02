@@ -1,0 +1,60 @@
+<%- include("encabezado") %>
+
+<div class="cabecera">
+  <div>
+    <h2>Reportes</h2>
+    <p>Dónde se concentran los problemas, para decidir en qué invertir</p>
+  </div>
+</div>
+
+<section class="reporte">
+  <h3>Salas con más reportes</h3>
+  <p class="lectura">Las salas donde más veces se ha interrumpido una clase.</p>
+
+  <% const topSalas = porSalaConNombre.length ? porSalaConNombre[0].total : 1; %>
+
+  <% if (porSalaConNombre.length === 0) { %>
+    <p class="lectura">Todavía no hay reportes registrados.</p>
+  <% } %>
+
+  <div class="barras">
+    <% porSalaConNombre.forEach(function (fila) { %>
+      <div class="barra">
+        <div class="encabezado">
+          <span class="donde"><%= fila.nombre %><small><%= fila.ubicacion %></small></span>
+          <span class="cuanto"><%= fila.total %> <%= fila.total === 1 ? "reporte" : "reportes" %></span>
+        </div>
+        <div class="riel">
+          <div class="relleno" style="width: <%= Math.round((fila.total / topSalas) * 100) %>%"></div>
+        </div>
+      </div>
+    <% }); %>
+  </div>
+</section>
+
+<section class="reporte">
+  <h3>Programas que más fallan</h3>
+  <p class="lectura">Útil para decidir qué revisar o reinstalar antes de que empiece el semestre.</p>
+
+  <% const topSoftware = porSoftware.length ? porSoftware[0].total : 1; %>
+
+  <% if (porSoftware.length === 0) { %>
+    <p class="lectura">Ningún programa tiene reportes todavía.</p>
+  <% } %>
+
+  <div class="barras">
+    <% porSoftware.forEach(function (fila) { %>
+      <div class="barra">
+        <div class="encabezado">
+          <span class="donde"><%= fila._id %></span>
+          <span class="cuanto"><%= fila.total %> <%= fila.total === 1 ? "reporte" : "reportes" %></span>
+        </div>
+        <div class="riel">
+          <div class="relleno" style="width: <%= Math.round((fila.total / topSoftware) * 100) %>%"></div>
+        </div>
+      </div>
+    <% }); %>
+  </div>
+</section>
+
+<%- include("pie") %>

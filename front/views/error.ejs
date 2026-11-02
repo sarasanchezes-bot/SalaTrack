@@ -1,0 +1,22 @@
+<%- include("encabezado") %>
+
+<div class="cabecera">
+  <div>
+    <h2><%= titulo %></h2>
+    <% if (typeof guia !== "undefined" && guia) { %><p><%= guia %></p><% } %>
+  </div>
+</div>
+
+<div class="aviso problema">
+  <strong>No se guardaron los cambios.</strong>
+  <p>Revisa los datos y vuelve a intentarlo.</p>
+</div>
+
+<p><a href="<%= typeof volver !== "undefined" && volver ? volver : "/incidencias" %>">Volver</a></p>
+
+<details class="tecnico">
+  <summary>Detalle técnico</summary>
+  <pre><%= mensaje %></pre>
+</details>
+
+<%- include("pie") %>

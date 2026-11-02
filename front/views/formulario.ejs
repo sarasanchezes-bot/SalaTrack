@@ -1,0 +1,251 @@
+<%- include("encabezado") %>
+
+<% if (incidencia) { %>
+
+  <div class="cabecera">
+    <div>
+      <h2>Seguimiento</h2>
+      <p>Reportada el <%= incidencia.fecha_reporte.toLocaleDateString("es-CO", { day: "numeric", month: "long", year: "numeric" }) %>
+         por <%= incidencia.reportado_por.nombre %></p>
+    </div>
+  </div>
+
+  <form method="POST" action="/incidencias/<%= incidencia._id %>" class="formulario">
+    <label>Qué pasó
+      <textarea name="descripcion" rows="3" required minlength="10"><%= incidencia.descripcion %></textarea>
+    </label>
+
+    <div class="fila">
+      <label>Severidad
+        <select name="severidad">
+          <% severidades.forEach(function (s) { %>
+            <option value="<%= s %>" <%= incidencia.severidad === s ? "selected" : "" %>><%= s %></option>
+          <% }); %>
+        </select>
+      </label>
+
+      <label>Estado
+        <select name="estado">
+          <option value="abierta" <%= incidencia.estado === "abierta" ? "selected" : "" %>>Sin atender</option>
+          <option value="en_atencion" <%= incidencia.estado === "en_atencion" ? "selected" : "" %>>En atención</option>
+          <option value="cerrada" <%= incidencia.estado === "cerrada" ? "selected" : "" %>>Resuelta</option>
+        </select>
+      </label>
+
+      <label>Quién hace el cambio
+        <input type="text" name="nombre_reporta" value="<%= incidencia.reportado_por.nombre %>">
+      </label>
+    </div>
+
+    <div class="acciones-formulario">
+      <button type="submit" class="boton">Guardar</button>
+      <a href="/incidencias">Volver</a>
+    </div>
+  </form>
+
+  <h3 style="margin-top:30px;font-size:17px;">Qué ha pasado con este reporte</h3>
+  <ul class="historial">
+    <% incidencia.historial.slice().reverse().forEach(function (paso) { %>
+      <li>
+        <strong><%= paso.estado === "abierta" ? "Sin atender" : (paso.estado === "en_atencion" ? "En atención" : "Resuelta") %></strong>
+        <span class="cuando">
+          &mdash; <%= paso.fecha.toLocaleDateString("es-CO", { day: "numeric", month: "long" }) %><% if (paso.por) { %>, <%= paso.por %><% } %>
+        </span>
+        <% if (paso.nota) { %><br><span class="anotacion"><%= paso.nota %></span><% } %>
+      </li>
+    <% }); %>
+  </ul>
+
+<% } else { %>
+
+  <div class="cabecera">
+    <div>
+      <h2>Reportar incidencia</h2>
+      <p>Qué falló, dónde y durante qué clase</p>
+    </div>
+  </div>
+
+  <form method="POST" action="/incidencias" class="formulario">
+
+    <label>Qué tipo de problema fue
+      <select name="tipo" id="tipo" required onchange="mostrarDetalle()">
+        <option value="hardware">Un equipo o alguna de sus partes</option>
+        <option value="software">Un programa</option>
+        <option value="permisos">Un permiso que hacía falta</option>
+      </select>
+    </label>
+
+    <div class="fila">
+      <label>Sala
+        <select name="sala_id" id="sala_id" required onchange="cargarEquipos()">
+          <% salas.forEach(function (sala) { %>
+            <option value="<%= sala.sala_id %>"><%= sala.nombre %></option>
+          <% }); %>
+        </select>
+      </label>
+
+      <label>Equipo
+        <select name="equipo_id" id="equipo_id">
+          <option value="">Toda la sala</option>
+        </select>
+      </label>
+    </div>
+
+    <label>Clase afectada
+      <select name="curso_id" required>
+        <% catalogoCursos.forEach(function (c) { %>
+          <option value="<%= c.curso_id %>"><%= c.nombre %></option>
+        <% }); %>
+      </select>
+    </label>
+
+    <label>Qué pasó
+      <textarea name="descripcion" rows="3" required minlength="10"
+                placeholder="Describe el problema como se lo contarías a quien lo va a arreglar"></textarea>
+    </label>
+
+    <div class="fila">
+      <label>Severidad
+        <select name="severidad" required>
+          <% severidades.forEach(function (s) { %>
+            <option value="<%= s %>" <%= s === "media" ? "selected" : "" %>><%= s %></option>
+          <% }); %>
+        </select>
+      </label>
+
+      <label>Estado
+        <select name="estado" required>
+          <option value="abierta">Sin atender</option>
+          <option value="en_atencion">En atención</option>
+          <option value="cerrada">Resuelta</option>
+        </select>
+      </label>
+
+      <label>Cuánto afectó la clase
+        <select name="impacto_clase">
+          <option value="">Sin especificar</option>
+          <option value="ninguno">No la afectó</option>
+          <option value="parcial">La afectó en parte</option>
+          <option value="total">Se perdió la clase</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="fila">
+      <label>Tu nombre
+        <input type="text" name="nombre_reporta" required minlength="2">
+      </label>
+
+      <label>Eres
+        <select name="rol_reporta" required>
+          <option value="estudiante">Estudiante</option>
+          <option value="docente">Docente</option>
+        </select>
+      </label>
+    </div>
+
+    <%# Cada tipo pide datos distintos: esa es la parte variable del documento %>
+
+    <fieldset id="detalle-hardware">
+      <legend>Sobre el equipo</legend>
+      <div class="fila">
+        <label>Qué parte falló
+          <input type="text" name="componente" placeholder="Fuente de poder, teclado, monitor...">
+        </label>
+        <label>¿Enciende?
+          <select name="enciende">
+            <option value="si">Sí</option>
+            <option value="no">No</option>
+          </select>
+        </label>
+      </div>
+      <label>Qué hace
+        <input type="text" name="sintoma" placeholder="Se apaga a los pocos minutos">
+      </label>
+    </fieldset>
+
+    <fieldset id="detalle-software">
+      <legend>Sobre el programa</legend>
+      <div class="fila">
+        <label>Cuál programa
+          <select name="software_id">
+            <% catalogoSoftware.forEach(function (s) { %>
+              <option value="<%= s.software_id %>"><%= s.nombre %> <%= s.version %></option>
+            <% }); %>
+          </select>
+        </label>
+        <label>¿Pasa siempre?
+          <select name="reproducible">
+            <option value="si">Sí</option>
+            <option value="no">No, solo a veces</option>
+          </select>
+        </label>
+      </div>
+      <label>Qué mensaje aparece
+        <input type="text" name="mensaje_error" placeholder="Copia el mensaje tal como sale en pantalla">
+      </label>
+    </fieldset>
+
+    <fieldset id="detalle-permisos">
+      <legend>Sobre el permiso</legend>
+      <label>Qué no se pudo hacer
+        <input type="text" name="accion_bloqueada" placeholder="Habilitar TCP/IP, instalar una librería...">
+      </label>
+      <div class="fila">
+        <label>Permiso que tiene el equipo
+          <select name="nivel_actual">
+            <% niveles.forEach(function (n) { %>
+              <option value="<%= n %>"><%= n %></option>
+            <% }); %>
+          </select>
+        </label>
+        <label>Permiso que haría falta
+          <select name="nivel_requerido">
+            <% niveles.forEach(function (n) { %>
+              <option value="<%= n %>" <%= n === "administrador" ? "selected" : "" %>><%= n %></option>
+            <% }); %>
+          </select>
+        </label>
+      </div>
+    </fieldset>
+
+    <div class="acciones-formulario">
+      <button type="submit" class="boton">Reportar</button>
+      <a href="/incidencias">Cancelar</a>
+    </div>
+  </form>
+
+  <script>
+    const EQUIPOS_POR_SALA = <%- JSON.stringify(
+      salas.reduce(function (acumulado, sala) {
+        acumulado[sala.sala_id] = (sala.equipos || []).map(e => e.equipo_id);
+        return acumulado;
+      }, {})
+    ) %>;
+
+    function mostrarDetalle() {
+      const tipo = document.getElementById("tipo").value;
+      ["hardware", "software", "permisos"].forEach(function (t) {
+        document.getElementById("detalle-" + t).style.display = (t === tipo) ? "block" : "none";
+      });
+    }
+
+    function cargarEquipos() {
+      const sala = document.getElementById("sala_id").value;
+      const select = document.getElementById("equipo_id");
+      select.innerHTML = '<option value="">Toda la sala</option>';
+      (EQUIPOS_POR_SALA[sala] || []).forEach(function (id) {
+        const opcion = document.createElement("option");
+        opcion.value = id;
+        opcion.textContent = "Equipo " + id;
+        select.appendChild(opcion);
+      });
+    }
+
+    mostrarDetalle();
+    cargarEquipos();
+  </script>
+
+<% } %>
+
+<%- include("pie") %>

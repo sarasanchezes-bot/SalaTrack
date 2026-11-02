@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SalaTrack</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Spline+Sans+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/estilos.css">
+</head>
+<body>
+
+<div class="aplicacion">
+
+  <aside class="lateral">
+    <div class="marca">SalaTrack</div>
+    <div class="marca-sub">Salas de cómputo<br>Universidad Católica Luis Amigó</div>
+
+    <nav>
+      <a href="/incidencias" class="<%= ruta.startsWith('/incidencias') ? 'activo' : '' %>">Incidencias</a>
+      <a href="/salas" class="<%= ruta.startsWith('/salas') ? 'activo' : '' %>">Salas</a>
+      <a href="/reportes" class="<%= ruta === '/reportes' ? 'activo' : '' %>">Reportes</a>
+    </nav>
+
+    <div class="pie-lateral">Semestre 2026-2</div>
+  </aside>
+
+  <main class="contenido">
