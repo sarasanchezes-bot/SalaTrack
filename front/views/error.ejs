@@ -1,12 +1,22 @@
 <%- include("encabezado") %>
 
-<h2><%= titulo %></h2>
-
-<div class="aviso">
-  <p>El validador de esquema de MongoDB no acepto el documento. Esto es correcto: significa que la validacion esta funcionando.</p>
-  <pre><%= mensaje %></pre>
+<div class="cabecera">
+  <div>
+    <h2><%= titulo %></h2>
+    <% if (typeof guia !== "undefined" && guia) { %><p><%= guia %></p><% } %>
+  </div>
 </div>
 
-<p><a href="/incidencias">Volver a incidencias</a></p>
+<div class="aviso problema">
+  <strong>No se guardaron los cambios.</strong>
+  <p>Revisa los datos y vuelve a intentarlo.</p>
+</div>
+
+<p><a href="<%= typeof volver !== "undefined" && volver ? volver : "/incidencias" %>">Volver</a></p>
+
+<details class="tecnico">
+  <summary>Detalle técnico</summary>
+  <pre><%= mensaje %></pre>
+</details>
 
 <%- include("pie") %>

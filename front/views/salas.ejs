@@ -1,40 +1,119 @@
 <%- include("encabezado") %>
 
-<h2>Salas y equipos</h2>
-<p class="origen">Tablas <code>Sala</code> y <code>Equipo</code> de SQL Server</p>
+<div class="cabecera">
+  <div>
+    <h2>Salas</h2>
+    <p>Las salas de cómputo registradas y cuántos equipos tiene cada una</p>
+  </div>
+</div>
 
 <% if (error) { %>
-  <div class="aviso">
-    <strong>No se pudo consultar SQL Server.</strong>
-    <p><%= error %></p>
-    <p>Revisa que el contenedor este arriba y que la variable SQL_PASSWORD este definida.</p>
+
+  <div class="aviso problema">
+    <strong>No se pueden consultar las salas en este momento.</strong>
+    <p>El servicio de salas no responde. Vuelve a intentarlo en unos minutos.</p>
+    <details class="tecnico">
+      <summary>Detalle técnico</summary>
+      <pre><%= error %></pre>
+    </details>
   </div>
+
 <% } else { %>
 
-  <table>
-    <thead>
-      <tr>
-        <th>Id</th>
-        <th>Nombre</th>
-        <th>Ubicacion</th>
-        <th>Capacidad</th>
-        <th>Equipos</th>
-        <th>Estado</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% salas.forEach(function (sala) { %>
-        <tr>
-          <td><%= sala.sala_id %></td>
-          <td><%= sala.nombre %></td>
-          <td><%= sala.ubicacion %></td>
-          <td><%= sala.capacidad %></td>
-          <td><%= sala.equipos %></td>
-          <td><span class="estado"><%= sala.estado %></span></td>
-        </tr>
-      <% }); %>
-    </tbody>
-  </table>
+  <% if (aviso === "creada") { %>
+    <div class="aviso">
+      <strong>Sala registrada.</strong>
+      <p>Aparecerá como opción al reportar incidencias después de la próxima sincronización.</p>
+    </div>
+  <% } else if (aviso === "actualizada") { %>
+    <div class="aviso"><strong>Cambios guardados.</strong></div>
+  <% } else if (aviso === "eliminada") { %>
+    <div class="aviso"><strong>Sala eliminada.</strong></div>
+  <% } %>
+
+  <details class="desplegable">
+    <summary>Registrar una sala</summary>
+
+    <form method="POST" action="/salas" class="formulario">
+      <div class="fila">
+        <label>Nombre
+          <input type="text" name="nombre" required maxlength="50" placeholder="Sala 303">
+        </label>
+        <label>Dónde queda
+          <input type="text" name="ubicacion" required maxlength="100" placeholder="Bloque 1 - Piso 3">
+        </label>
+      </div>
+
+      <div class="fila">
+        <label>Puestos
+          <input type="number" name="capacidad" required min="1" value="20">
+        </label>
+        <label>Estado
+          <select name="estado">
+            <option value="disponible">Disponible</option>
+            <option value="fuera de servicio">Fuera de servicio</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="acciones-formulario">
+        <button type="submit" class="boton">Registrar sala</button>
+      </div>
+    </form>
+  </details>
+
+  <div class="salas">
+    <% salas.forEach(function (sala) { %>
+      <% const maquinas = sala.maquinas || []; %>
+      <% const activos = maquinas.filter(m => m.estado === "disponible").length; %>
+
+      <article class="sala <%= sala.estado === "disponible" ? "" : "inactiva" %>">
+
+        <div class="identidad">
+          <p class="nombre"><%= sala.nombre %></p>
+          <p class="donde">
+            <span><%= sala.ubicacion %></span>
+            <span><%= sala.capacidad %> puestos</span>
+            <% if (sala.estado !== "disponible") { %><span>Fuera de servicio</span><% } %>
+          </p>
+        </div>
+
+        <%# Cada cuadro es un equipo real de la sala. Los huecos son
+            los puestos sin equipo asignado todavia. %>
+        <div class="maquinas">
+          <div class="rejilla" role="img"
+               aria-label="<%= activos %> de <%= maquinas.length %> equipos disponibles">
+            <% maquinas.forEach(function (m) { %>
+              <% const clase = m.estado === "disponible" ? "disponible"
+                             : (m.estado === "en mantenimiento" ? "mantenimiento" : "baja"); %>
+              <div class="maquina <%= clase %>" title="Equipo <%= m.equipo_id %> &mdash; <%= m.estado %>"></div>
+            <% }); %>
+            <% for (let i = maquinas.length; i < sala.capacidad && i < maquinas.length + 6; i++) { %>
+              <div class="maquina hueco" title="Puesto sin equipo asignado"></div>
+            <% } %>
+          </div>
+          <p class="cuenta"><%= activos %> de <%= maquinas.length %> equipos en servicio</p>
+        </div>
+
+        <div class="acciones-sala">
+          <span class="enlaces">
+            <a href="/salas/<%= sala.sala_id %>/editar">Editar</a>
+            <form method="POST" action="/salas/<%= sala.sala_id %>/eliminar"
+                  onsubmit="return confirm('Eliminar <%= sala.nombre %>?');">
+              <button type="submit" class="borrar">Eliminar</button>
+            </form>
+          </span>
+        </div>
+      </article>
+    <% }); %>
+  </div>
+
+  <div class="leyenda">
+    <span><i class="maquina disponible"></i> En servicio</span>
+    <span><i class="maquina mantenimiento"></i> En mantenimiento</span>
+    <span><i class="maquina baja"></i> Fuera de servicio</span>
+    <span><i style="border: 1px dashed var(--linea-fuerte);"></i> Puesto sin equipo</span>
+  </div>
 
 <% } %>
 

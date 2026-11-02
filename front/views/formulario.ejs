@@ -1,190 +1,205 @@
 <%- include("encabezado") %>
 
-<h2><%= incidencia ? "Editar incidencia" : "Registrar incidencia" %></h2>
-
 <% if (incidencia) { %>
-  <%# En edicion solo se cambian los campos comunes. El tipo y el
-      detalle no se tocan porque cambiarlos cambiaria la forma del
-      documento y habria que validarlo de nuevo completo. %>
-  <p class="origen">Tipo <strong><%= incidencia.tipo %></strong>. Si cambias el estado se agrega un elemento al historial.</p>
+
+  <div class="cabecera">
+    <div>
+      <h2>Seguimiento</h2>
+      <p>Reportada el <%= incidencia.fecha_reporte.toLocaleDateString("es-CO", { day: "numeric", month: "long", year: "numeric" }) %>
+         por <%= incidencia.reportado_por.nombre %></p>
+    </div>
+  </div>
 
   <form method="POST" action="/incidencias/<%= incidencia._id %>" class="formulario">
-    <label>Descripcion
+    <label>Qué pasó
       <textarea name="descripcion" rows="3" required minlength="10"><%= incidencia.descripcion %></textarea>
     </label>
 
-    <label>Severidad
-      <select name="severidad">
-        <% severidades.forEach(function (s) { %>
-          <option value="<%= s %>" <%= incidencia.severidad === s ? "selected" : "" %>><%= s %></option>
-        <% }); %>
-      </select>
-    </label>
+    <div class="fila">
+      <label>Severidad
+        <select name="severidad">
+          <% severidades.forEach(function (s) { %>
+            <option value="<%= s %>" <%= incidencia.severidad === s ? "selected" : "" %>><%= s %></option>
+          <% }); %>
+        </select>
+      </label>
 
-    <label>Estado
-      <select name="estado">
-        <% estados.forEach(function (e) { %>
-          <option value="<%= e %>" <%= incidencia.estado === e ? "selected" : "" %>><%= e %></option>
-        <% }); %>
-      </select>
-    </label>
+      <label>Estado
+        <select name="estado">
+          <option value="abierta" <%= incidencia.estado === "abierta" ? "selected" : "" %>>Sin atender</option>
+          <option value="en_atencion" <%= incidencia.estado === "en_atencion" ? "selected" : "" %>>En atención</option>
+          <option value="cerrada" <%= incidencia.estado === "cerrada" ? "selected" : "" %>>Resuelta</option>
+        </select>
+      </label>
 
-    <label>Quien hace el cambio
-      <input type="text" name="nombre_reporta" value="<%= incidencia.reportado_por.nombre %>">
-    </label>
+      <label>Quién hace el cambio
+        <input type="text" name="nombre_reporta" value="<%= incidencia.reportado_por.nombre %>">
+      </label>
+    </div>
 
-    <div class="botones">
-      <button type="submit" class="boton">Guardar cambios</button>
-      <a href="/incidencias">Cancelar</a>
+    <div class="acciones-formulario">
+      <button type="submit" class="boton">Guardar</button>
+      <a href="/incidencias">Volver</a>
     </div>
   </form>
 
-  <h3>Historial</h3>
+  <h3 style="margin-top:30px;font-size:17px;">Qué ha pasado con este reporte</h3>
   <ul class="historial">
-    <% incidencia.historial.forEach(function (paso) { %>
+    <% incidencia.historial.slice().reverse().forEach(function (paso) { %>
       <li>
-        <strong><%= paso.estado %></strong>
-        &mdash; <%= paso.fecha.toISOString().slice(0, 16).replace("T", " ") %>
-        <% if (paso.por) { %> &mdash; <%= paso.por %><% } %>
-        <% if (paso.nota) { %><br><span class="nota"><%= paso.nota %></span><% } %>
+        <strong><%= paso.estado === "abierta" ? "Sin atender" : (paso.estado === "en_atencion" ? "En atención" : "Resuelta") %></strong>
+        <span class="cuando">
+          &mdash; <%= paso.fecha.toLocaleDateString("es-CO", { day: "numeric", month: "long" }) %><% if (paso.por) { %>, <%= paso.por %><% } %>
+        </span>
+        <% if (paso.nota) { %><br><span class="anotacion"><%= paso.nota %></span><% } %>
       </li>
     <% }); %>
   </ul>
 
 <% } else { %>
 
+  <div class="cabecera">
+    <div>
+      <h2>Reportar incidencia</h2>
+      <p>Qué falló, dónde y durante qué clase</p>
+    </div>
+  </div>
+
   <form method="POST" action="/incidencias" class="formulario">
 
-    <label>Tipo
+    <label>Qué tipo de problema fue
       <select name="tipo" id="tipo" required onchange="mostrarDetalle()">
-        <% tipos.forEach(function (t) { %>
-          <option value="<%= t %>"><%= t %></option>
-        <% }); %>
+        <option value="hardware">Un equipo o alguna de sus partes</option>
+        <option value="software">Un programa</option>
+        <option value="permisos">Un permiso que hacía falta</option>
       </select>
     </label>
 
-    <label>Sala
-      <select name="sala_id" id="sala_id" required onchange="cargarEquipos()">
-        <% salas.forEach(function (sala) { %>
-          <option value="<%= sala.sala_id %>"><%= sala.nombre %></option>
-        <% }); %>
-      </select>
-    </label>
+    <div class="fila">
+      <label>Sala
+        <select name="sala_id" id="sala_id" required onchange="cargarEquipos()">
+          <% salas.forEach(function (sala) { %>
+            <option value="<%= sala.sala_id %>"><%= sala.nombre %></option>
+          <% }); %>
+        </select>
+      </label>
 
-    <label>Equipo (opcional)
-      <select name="equipo_id" id="equipo_id">
-        <option value="">Toda la sala</option>
-      </select>
-    </label>
+      <label>Equipo
+        <select name="equipo_id" id="equipo_id">
+          <option value="">Toda la sala</option>
+        </select>
+      </label>
+    </div>
 
-    <label>Curso afectado
+    <label>Clase afectada
       <select name="curso_id" required>
         <% catalogoCursos.forEach(function (c) { %>
-          <option value="<%= c.curso_id %>"><%= c.codigo %> &mdash; <%= c.nombre %></option>
+          <option value="<%= c.curso_id %>"><%= c.nombre %></option>
         <% }); %>
       </select>
     </label>
 
-    <label>Descripcion
+    <label>Qué pasó
       <textarea name="descripcion" rows="3" required minlength="10"
-                placeholder="Minimo 10 caracteres"></textarea>
+                placeholder="Describe el problema como se lo contarías a quien lo va a arreglar"></textarea>
     </label>
 
     <div class="fila">
       <label>Severidad
         <select name="severidad" required>
           <% severidades.forEach(function (s) { %>
-            <option value="<%= s %>"><%= s %></option>
+            <option value="<%= s %>" <%= s === "media" ? "selected" : "" %>><%= s %></option>
           <% }); %>
         </select>
       </label>
 
       <label>Estado
         <select name="estado" required>
-          <% estados.forEach(function (e) { %>
-            <option value="<%= e %>"><%= e %></option>
-          <% }); %>
+          <option value="abierta">Sin atender</option>
+          <option value="en_atencion">En atención</option>
+          <option value="cerrada">Resuelta</option>
         </select>
       </label>
 
-      <label>Impacto en la clase
+      <label>Cuánto afectó la clase
         <select name="impacto_clase">
           <option value="">Sin especificar</option>
-          <option value="ninguno">ninguno</option>
-          <option value="parcial">parcial</option>
-          <option value="total">total</option>
+          <option value="ninguno">No la afectó</option>
+          <option value="parcial">La afectó en parte</option>
+          <option value="total">Se perdió la clase</option>
         </select>
       </label>
     </div>
 
     <div class="fila">
-      <label>Reportado por
+      <label>Tu nombre
         <input type="text" name="nombre_reporta" required minlength="2">
       </label>
 
-      <label>Rol
+      <label>Eres
         <select name="rol_reporta" required>
-          <option value="estudiante">estudiante</option>
-          <option value="docente">docente</option>
+          <option value="estudiante">Estudiante</option>
+          <option value="docente">Docente</option>
         </select>
       </label>
     </div>
 
-    <%# ------------------------------------------------------
-        Detalle variable: se muestra uno u otro bloque segun el
-        tipo elegido. Es la parte del documento que cambia.
-        ------------------------------------------------------ %>
+    <%# Cada tipo pide datos distintos: esa es la parte variable del documento %>
 
-    <fieldset id="detalle-hardware" class="detalle-bloque">
-      <legend>Detalle de hardware</legend>
-      <label>Componente
-        <input type="text" name="componente" placeholder="fuente de poder, teclado...">
-      </label>
-      <label>Sintoma
-        <input type="text" name="sintoma" placeholder="apagado intermitente...">
-      </label>
-      <label>El equipo enciende
-        <select name="enciende">
-          <option value="si">si</option>
-          <option value="no">no</option>
-        </select>
+    <fieldset id="detalle-hardware">
+      <legend>Sobre el equipo</legend>
+      <div class="fila">
+        <label>Qué parte falló
+          <input type="text" name="componente" placeholder="Fuente de poder, teclado, monitor...">
+        </label>
+        <label>¿Enciende?
+          <select name="enciende">
+            <option value="si">Sí</option>
+            <option value="no">No</option>
+          </select>
+        </label>
+      </div>
+      <label>Qué hace
+        <input type="text" name="sintoma" placeholder="Se apaga a los pocos minutos">
       </label>
     </fieldset>
 
-    <fieldset id="detalle-software" class="detalle-bloque">
-      <legend>Detalle de software</legend>
-      <label>Programa
-        <select name="software_id">
-          <% catalogoSoftware.forEach(function (s) { %>
-            <option value="<%= s.software_id %>"><%= s.nombre %> <%= s.version %></option>
-          <% }); %>
-        </select>
-      </label>
-      <label>Mensaje de error
-        <input type="text" name="mensaje_error">
-      </label>
-      <label>Se puede reproducir
-        <select name="reproducible">
-          <option value="si">si</option>
-          <option value="no">no</option>
-        </select>
+    <fieldset id="detalle-software">
+      <legend>Sobre el programa</legend>
+      <div class="fila">
+        <label>Cuál programa
+          <select name="software_id">
+            <% catalogoSoftware.forEach(function (s) { %>
+              <option value="<%= s.software_id %>"><%= s.nombre %> <%= s.version %></option>
+            <% }); %>
+          </select>
+        </label>
+        <label>¿Pasa siempre?
+          <select name="reproducible">
+            <option value="si">Sí</option>
+            <option value="no">No, solo a veces</option>
+          </select>
+        </label>
+      </div>
+      <label>Qué mensaje aparece
+        <input type="text" name="mensaje_error" placeholder="Copia el mensaje tal como sale en pantalla">
       </label>
     </fieldset>
 
-    <fieldset id="detalle-permisos" class="detalle-bloque">
-      <legend>Detalle de permisos</legend>
-      <label>Accion bloqueada
-        <input type="text" name="accion_bloqueada" placeholder="Habilitar TCP/IP...">
+    <fieldset id="detalle-permisos">
+      <legend>Sobre el permiso</legend>
+      <label>Qué no se pudo hacer
+        <input type="text" name="accion_bloqueada" placeholder="Habilitar TCP/IP, instalar una librería...">
       </label>
       <div class="fila">
-        <label>Nivel actual
+        <label>Permiso que tiene el equipo
           <select name="nivel_actual">
             <% niveles.forEach(function (n) { %>
               <option value="<%= n %>"><%= n %></option>
             <% }); %>
           </select>
         </label>
-        <label>Nivel requerido
+        <label>Permiso que haría falta
           <select name="nivel_requerido">
             <% niveles.forEach(function (n) { %>
               <option value="<%= n %>" <%= n === "administrador" ? "selected" : "" %>><%= n %></option>
@@ -194,15 +209,13 @@
       </div>
     </fieldset>
 
-    <div class="botones">
-      <button type="submit" class="boton">Guardar</button>
+    <div class="acciones-formulario">
+      <button type="submit" class="boton">Reportar</button>
       <a href="/incidencias">Cancelar</a>
     </div>
   </form>
 
   <script>
-    // Equipos de cada sala, tal como vienen embebidos en el
-    // documento de la sala en MongoDB.
     const EQUIPOS_POR_SALA = <%- JSON.stringify(
       salas.reduce(function (acumulado, sala) {
         acumulado[sala.sala_id] = (sala.equipos || []).map(e => e.equipo_id);

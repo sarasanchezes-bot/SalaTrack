@@ -1,0 +1,40 @@
+<%- include("encabezado") %>
+
+<div class="cabecera">
+  <div>
+    <h2><%= sala.nombre %></h2>
+    <p>Editar los datos de la sala</p>
+  </div>
+</div>
+
+<form method="POST" action="/salas/<%= sala.sala_id %>" class="formulario">
+
+  <div class="fila">
+    <label>Nombre
+      <input type="text" name="nombre" value="<%= sala.nombre %>" required maxlength="50">
+    </label>
+    <label>Dónde queda
+      <input type="text" name="ubicacion" value="<%= sala.ubicacion %>" required maxlength="100">
+    </label>
+  </div>
+
+  <div class="fila">
+    <label>Puestos
+      <input type="number" name="capacidad" value="<%= sala.capacidad %>" required min="1">
+      <span class="ayuda">Tiene que ser al menos uno.</span>
+    </label>
+    <label>Estado
+      <select name="estado">
+        <option value="disponible" <%= sala.estado === "disponible" ? "selected" : "" %>>Disponible</option>
+        <option value="fuera de servicio" <%= sala.estado === "fuera de servicio" ? "selected" : "" %>>Fuera de servicio</option>
+      </select>
+    </label>
+  </div>
+
+  <div class="acciones-formulario">
+    <button type="submit" class="boton">Guardar</button>
+    <a href="/salas">Cancelar</a>
+  </div>
+</form>
+
+<%- include("pie") %>
