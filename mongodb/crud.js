@@ -8,8 +8,8 @@
 db = db.getSiblingDB("salatrack");
 
 // ----------------------------------------------------------------------------
-// 1. DATO DE PRUEBA: 20 INCIDENCIAS VALIDadas CON EL ESQUEMA DE JUAN
-// (Salas: 1, 2, 3 | Equipos: 1 al 6)
+// 1. DATO DE PRUEBA: 20 INCIDENCIAS VALIDADAS CON EL ESQUEMA DE JUAN
+// (Salas válidas: 1, 2, 3 | Equipos válidos: 1 al 6)
 // ----------------------------------------------------------------------------
 const incidenciasPrueba = [
   {
@@ -294,12 +294,12 @@ const incidenciasPrueba = [
   }
 ];
 
-// Insertar documentos (Sin hacer .drop() para respetar los validadores de Juan)
+// Inserción de documentos respetando el validador de esquema de Juan (sin .drop())
 db.incidencias.insertMany(incidenciasPrueba);
 console.log("-> 20 incidencias validadas insertadas correctamente.");
 
 // ============================================================================
-// 2. SEIS OPERACIONES CRUD OBLIGATORIAS (ADAPTADAS AL NUEVO ESQUEMA)
+// 2. SEIS OPERACIONES CRUD OBLIGATORIAS (ADAPTADAS AL ESQUEMA)
 // ============================================================================
 
 // COMANDO 1: insertOne
